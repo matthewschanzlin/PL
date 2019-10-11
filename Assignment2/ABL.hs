@@ -28,7 +28,7 @@ data ABLExpr = Var Variable
              | And ABLExpr ABLExpr
              | Or ABLExpr ABLExpr
              | Not ABLExpr
-             | Let1 ABLExpr ABLExpr ABLExpr
+             | Let1 Variable ABLExpr ABLExpr
              | If ABLExpr ABLExpr ABLExpr
              deriving (Show, Eq)
 
@@ -47,9 +47,8 @@ showABL (Eq e1 e2) = "(= " ++ showABL e1 ++ " " ++ showABL e2 ++ ")"
 showABL (And e1 e2) = "(and " ++ showABL e1 ++ " " ++ showABL e2 ++ ")"
 showABL (Or e1 e2) = "(or " ++ showABL e1 ++ " " ++ showABL e2 ++ ")"
 showABL (Not e1) = "(not " ++ showABL e1 ++ ")"
-showABL (Let1 v1 e1 e2) = "(let1 (" ++ showABL v1 ++ " " ++ showABL e1 ++ ") " ++ showABL e2 ++ ")"
+showABL (Let1 v1 e1 e2) = "(let1 (" ++ showABL (Var v1) ++ " " ++ showABL e1 ++ ") " ++ showABL e2 ++ ")"
 showABL (If e1 e2 e3) = "(if-else " ++ showABL e1 ++ " " ++ showABL e2 ++ " " ++ showABL e3 ++ ")"
-
 
 -- add tests
 tests :: IO ()
@@ -63,6 +62,9 @@ tests = do
   test "showABL false"
        (showABL (Val (Bool False))) 
        "false"
+  test "showABL let"
+       (showABL (Let1 "x" (Val (Num 5)) (Mul (Var "x") (Val (Num 10)))))
+       "(let1 (x 5) (* x 10))"     
 
 ---------------------------- your helper functions --------------------------
 

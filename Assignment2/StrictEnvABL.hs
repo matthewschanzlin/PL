@@ -26,6 +26,8 @@ applyIntegerBinOp f _ _ = Nothing
 -- Apply a binary boolean operation
 applyBoolBinOp :: BinOp Bool -> ABLValue -> ABLValue -> Maybe ABLValue
 applyBoolBinOp f (Bool b1) (Bool b2) = Just (Bool (f b1 b2))
+applyBoolBinOp (==) (Num b1) (Num b2) = Just (Bool (Just (Num 0)) == (Just evalABL [] (Sub (Val (Num b1)) (Val (Num b2)))))
+applyBoolBinOp f _ _ = Nothing
 
 -- Evaluate an ABL expression in the given environment
 evalABL :: Env ABLValue -> ABLExpr -> Maybe ABLValue
@@ -55,12 +57,6 @@ evalABL env (Div e1 e2) =
                        Just v2 -> applyIntegerBinOp div v1 v2
                        Nothing -> Nothing
        Nothing -> Nothing
-evalABL env (Eq e1 e2) = 
-  case evalABL env e1 of
-       Just v1 -> case evalABL env e2 of
-                       Just v2 -> applyBoolBinOp (==) v1 v2
-                       Nothing -> Nothing
-       Nothing -> Nothing
 evalABL env (And e1 e2) = 
   case evalABL env e1 of
        Just v1 -> case evalABL env e2 of
@@ -73,13 +69,29 @@ evalABL env (Or e1 e2) =
                        Just v2 -> applyBoolBinOp (||) v1 v2
                        Nothing -> Nothing
        Nothing -> Nothing
+evalABL env (Eq e1 e2) = 
+  case evalABL env e1 of
+       Just v1 -> case evalABL env e2 of
+                       Just v2 -> applyBoolBinOp (==) v1 v2
+                       Nothing -> Nothing
+       Nothing -> Nothing
 evalABL env (Not e1) = 
   case evalABL env e1 of
        Just v1 -> case applyBoolBinOp (==) v1 (Bool True) of
                       Just (Bool True) -> Just (Bool False)
                       Just (Bool False) -> Just (Bool True)
        Nothing -> Nothing
-{- TASK: Complete the remaining clauses of the evaluator -} 
+evalABL env (If e1 e2 e3) = 
+  case evalABL env e1 of
+       Just (Bool True) -> evalABL env e2
+       Just (Bool False) -> evalABL env e3
+       Nothing -> Nothing
+--evalABL env (Let1 e1 e2 e3) = 
+--  case evalABL env e1 of
+--       Just v1 -> case applyBoolBinOp (==) v1 (Bool True) of
+--                      Just (Bool True) -> Just (Bool False)
+--                      Just (Bool False) -> Just (Bool True)
+--       Nothing -> Nothing
 
 
 -- Check if the ABL expression is well-scoped, that is if all variables are 
@@ -128,16 +140,22 @@ tests = do
        (evalABL empty (Div (Val (Num 64)) (Val (Num 16))))
        (Just (Num 4))
   test "eval (&& True True)" 
-       (evalABL empty (Eq (Val (Bool True)) (Val (Bool True))))
+       (evalABL empty (And (Val (Bool True)) (Val (Bool True))))
        (Just (Bool True))
   test "eval (&& True False)" 
-       (evalABL empty (Eq (Val (Bool True)) (Val (Bool False))))
+       (evalABL empty (And (Val (Bool True)) (Val (Bool False))))
        (Just (Bool False))
   test "eval (not (&& True False))" 
-       (evalABL empty (Not (Eq (Val (Bool True)) (Val (Bool False)))))
+       (evalABL empty (Not (And (Val (Bool True)) (Val (Bool False)))))
        (Just (Bool True))
   test "eval (not (&& True True))" 
-       (evalABL empty (Not (Eq (Val (Bool True)) (Val (Bool True)))))
+       (evalABL empty (Not (And (Val (Bool True)) (Val (Bool True)))))
        (Just (Bool False))
+  test "eval (if True (+ 2 10) (* 2 10))" 
+       (evalABL empty (If (Val (Bool True)) (Add (Val (Num 2)) (Val (Num 10))) (Mul (Val (Num 2)) (Val (Num 10)))))
+       (Just (Num 12))
+  test "eval [(x, 3)] (if True (+ 2 10) (* 2 x))"
+       (evalABL [("x", (Num 3))] (If (Val (Bool False)) (Add (Val (Num 2)) (Val (Num 10))) (Mul (Val (Num 2)) (Var "x"))))
+       (Just (Num 6))
 ---------------------------- your helper functions --------------------------
 
