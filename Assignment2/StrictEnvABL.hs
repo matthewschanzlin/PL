@@ -55,6 +55,30 @@ evalABL env (Div e1 e2) =
                        Just v2 -> applyIntegerBinOp div v1 v2
                        Nothing -> Nothing
        Nothing -> Nothing
+evalABL env (Eq e1 e2) = 
+  case evalABL env e1 of
+       Just v1 -> case evalABL env e2 of
+                       Just v2 -> applyBoolBinOp (==) v1 v2
+                       Nothing -> Nothing
+       Nothing -> Nothing
+evalABL env (And e1 e2) = 
+  case evalABL env e1 of
+       Just v1 -> case evalABL env e2 of
+                       Just v2 -> applyBoolBinOp (&&) v1 v2
+                       Nothing -> Nothing
+       Nothing -> Nothing
+evalABL env (Or e1 e2) = 
+  case evalABL env e1 of
+       Just v1 -> case evalABL env e2 of
+                       Just v2 -> applyBoolBinOp (||) v1 v2
+                       Nothing -> Nothing
+       Nothing -> Nothing
+evalABL env (Not e1) = 
+  case evalABL env e1 of
+       Just v1 -> case applyBoolBinOp (==) v1 True of
+                      Just True -> (Val (Bool False))
+                      Just False -> (Val (Bool True))
+       Nothing -> Nothing
 {- TASK: Complete the remaining clauses of the evaluator -} 
 
 
@@ -103,5 +127,14 @@ tests = do
   test "eval (/ 64 16)" 
        (evalABL empty (Div (Val (Num 64)) (Val (Num 16))))
        (Just (Num 4))
+  test "eval (&& True True)" 
+       (evalABL empty (Eq (Val (Bool True)) (Val (Bool True))))
+       (Just (Bool True))
+  test "eval (&& True False)" 
+       (evalABL empty (Eq (Val (Bool True)) (Val (Bool False))))
+       (Just (Bool False))
+  test "eval (not (&& True False))" 
+       (evalABL empty (Not (Eq (Val (Bool True)) (Val (Bool False)))))
+       (Just (Bool True))
 ---------------------------- your helper functions --------------------------
 
