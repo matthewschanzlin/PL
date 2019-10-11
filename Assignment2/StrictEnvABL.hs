@@ -136,5 +136,8 @@ tests = do
   test "eval (not (&& True False))" 
        (evalABL empty (Not (Eq (Val (Bool True)) (Val (Bool False)))))
        (Just (Bool True))
+  test "eval (not (&& True True))" 
+       (evalABL empty (Not (Eq (Val (Bool True)) (Val (Bool True)))))
+       (Just (Bool False))
 ---------------------------- your helper functions --------------------------
 
