@@ -2,7 +2,7 @@
 Module      :  ABL
 Description :  Syntax of the ABL language.
 
-Maintainer  :  Your Name <your email>
+Maintainer  :  Nicholas Seidl <seidl.n@husky.neu.edu>, Matthew Schanzlin <Matthew Schanzlin <schanzlin.ma@husky.neu.edu>
 -}
 
 module ABL where
@@ -21,7 +21,15 @@ data ABLValue = Num Integer
 data ABLExpr = Var Variable
              | Val ABLValue
              | Add ABLExpr ABLExpr
-             {- TASK: complete the remaining constructors -}
+             | Sub ABLExpr ABLExpr
+             | Mul ABLExpr ABLExpr
+             | Div ABLExpr ABLExpr
+             | Eq ABLExpr ABLExpr
+             | And ABLExpr ABLExpr
+             | Or ABLExpr ABLExpr
+             | Not ABLExpr
+             | Let1 ABLExpr ABLExpr ABLExpr
+             | If ABLExpr ABLExpr ABLExpr
              deriving (Show, Eq)
 
 showABL :: ABLExpr -> String
@@ -32,7 +40,15 @@ showABL (Val (Bool b)) =
      then "true" 
      else "false"
 showABL (Add e1 e2) = "(+ " ++ showABL e1 ++ " " ++ showABL e2 ++ ")"
-{- TASK: complete the remaining cases -}
+showABL (Sub e1 e2) = "(- " ++ showABL e1 ++ " " ++ showABL e2 ++ ")"
+showABL (Mul e1 e2) = "(* " ++ showABL e1 ++ " " ++ showABL e2 ++ ")"
+showABL (Div e1 e2) = "(/ " ++ showABL e1 ++ " " ++ showABL e2 ++ ")"
+showABL (Eq e1 e2) = "(= " ++ showABL e1 ++ " " ++ showABL e2 ++ ")"
+showABL (And e1 e2) = "(and " ++ showABL e1 ++ " " ++ showABL e2 ++ ")"
+showABL (Or e1 e2) = "(or " ++ showABL e1 ++ " " ++ showABL e2 ++ ")"
+showABL (Not e1) = "(not " ++ showABL e1 ++ ")"
+showABL (Let1 v1 e1 e2) = "(let1 (" ++ showABL v1 ++ " " ++ showABL e1 ++ ") " ++ showABL e2 ++ ")"
+showABL (If e1 e2 e3) = "(if-else " ++ showABL e1 ++ " " ++ showABL e2 ++ " " ++ showABL e3 ++ ")"
 
 
 -- add tests
