@@ -75,9 +75,9 @@ evalABL env (Or e1 e2) =
        Nothing -> Nothing
 evalABL env (Not e1) = 
   case evalABL env e1 of
-       Just v1 -> case applyBoolBinOp (==) v1 True of
-                      Just True -> (Val (Bool False))
-                      Just False -> (Val (Bool True))
+       Just v1 -> case applyBoolBinOp (==) v1 (Bool True) of
+                      Just (Bool True) -> Just (Bool False)
+                      Just (Bool False) -> Just (Bool True)
        Nothing -> Nothing
 {- TASK: Complete the remaining clauses of the evaluator -} 
 
