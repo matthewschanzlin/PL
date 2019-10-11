@@ -6,8 +6,8 @@ Maintainer  :  Your Name <your email>
 -}
 
 import qualified Env (tests)
-import qualified ABV (tests)
-import qualified StrictEnvEBL (tests)
+import qualified ABL (tests)
+import qualified StrictEnvABL (tests)
 
 -- Fill in your name(s)
 -- For a single partner: (Just "Your Name", Nothing)
@@ -25,6 +25,6 @@ hoursSpent = (0, 0)
 allTests :: IO ()
 allTests = do
   Env.tests
-  ABV.tests
-  StrictEnvEBL.tests
+  ABL.tests
+  StrictEnvABL.tests
 

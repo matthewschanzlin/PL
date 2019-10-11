@@ -2,7 +2,7 @@
 Module      :  Env
 Description :  An implementation of environments as association lists.
 
-Maintainer  :  Your Name <your email>
+Maintainer  :  Nicholas Seidl <seidl.n@husky.neu.edu>, Matthew Schanzlin <Matthew Schanzlin <schanzlin.ma@husky.neu.edu>
 -}
 
 module Env where
@@ -15,25 +15,28 @@ type Env a = [(String, a)]
 
 -- Construct an empty environment
 empty :: Env a
-empty = undefined {- TASK: replace -}
+empty = []
 
 -- Add a binding of `x` to `v` to the environment `env`.
 add :: String -> a -> Env a -> Env a
-add x v env = undefined {- TASK: replace -}
+add x v env = (x, v) : env
 
 -- Retrieve the binding from an environment. If the binding is not found, return
 -- Nothing.
 get :: String -> Env a -> Maybe a
-get x [] = undefined {- TASK: replace -}
-get x ((y, v) : env) = undefined {- TASK: replace -}
+get x [] = Nothing
+get x ((y, v) : env)
+    | x == y = Just v
+    | otherwise = get x env 
 
-
--- provide your tests
+---- provide your tests
 tests :: IO ()
 tests = do 
-  test "get empty" (get "x" (empty :: Env Integer)) Nothing
-  test "get add" (get "x" (add "x" 10 empty)) (Just 10)
+    test "get empty" (get "x" (empty :: Env Integer)) Nothing
+    test "get add" (get "x" (add "x" 10 empty)) (Just 10)
+    test "get duplicate" (get "x" (add "x" 10 (add "x" 20 empty))) (Just 10)
+    test "get str" (get "x" (add "x" "asdf" empty)) (Just "asdf")
+    test "get env" (get "x" (add "x" (add "y" 20 empty) empty)) (Just (add "y" 20 empty))
 
-
----------------------------- your helper functions --------------------------
+------------------------------ your helper functions --------------------------
 
