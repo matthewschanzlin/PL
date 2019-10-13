@@ -30,14 +30,16 @@ data ABLExpr = Var Variable
              | Not ABLExpr
              | Let1 Variable ABLExpr ABLExpr
              | If ABLExpr ABLExpr ABLExpr
+             | Fresh ABLExpr
+             | LetStar [(Variable, ABLExpr)] ABLExpr
              deriving (Show, Eq)
 
 showABL :: ABLExpr -> String
 showABL (Var x) = x
 showABL (Val (Num n)) = show n
-showABL (Val (Bool b)) = 
-  if b 
-     then "true" 
+showABL (Val (Bool b)) =
+  if b
+     then "true"
      else "false"
 showABL (Add e1 e2) = "(+ " ++ showABL e1 ++ " " ++ showABL e2 ++ ")"
 showABL (Sub e1 e2) = "(- " ++ showABL e1 ++ " " ++ showABL e2 ++ ")"
@@ -49,22 +51,27 @@ showABL (Or e1 e2) = "(or " ++ showABL e1 ++ " " ++ showABL e2 ++ ")"
 showABL (Not e1) = "(not " ++ showABL e1 ++ ")"
 showABL (Let1 v1 e1 e2) = "(let1 (" ++ showABL (Var v1) ++ " " ++ showABL e1 ++ ") " ++ showABL e2 ++ ")"
 showABL (If e1 e2 e3) = "(if-else " ++ showABL e1 ++ " " ++ showABL e2 ++ " " ++ showABL e3 ++ ")"
+showABL (Fresh e1) = "(fresh-env " ++ showABL e1 ++ ")"
+showABL (LetStar [] e) = "(let1 () " ++ showABL e ++ ")"
+showABL (LetStar l e) = showABL (Let1 (fst (head l)) (snd (head l)) (LetStar (tail l) e))
 
 -- add tests
 tests :: IO ()
 tests = do
   test "showABL num"
-       (showABL (Val (Num 10))) 
+       (showABL (Val (Num 10)))
        "10"
   test "showABL true"
-       (showABL (Val (Bool True))) 
+       (showABL (Val (Bool True)))
        "true"
   test "showABL false"
-       (showABL (Val (Bool False))) 
+       (showABL (Val (Bool False)))
        "false"
   test "showABL let"
        (showABL (Let1 "x" (Val (Num 5)) (Mul (Var "x") (Val (Num 10)))))
-       "(let1 (x 5) (* x 10))"     
+       "(let1 (x 5) (* x 10))"
+  test "showABL let*"
+       (showABL (LetStar [("x", (Val (Num 5))), ("y", (Val (Num 6)))] (Mul (Var "x") (Var "y"))))
+       "(let1 (x 5) (let1 (y 6) (let1 () (* x y))))"
 
 ---------------------------- your helper functions --------------------------
-

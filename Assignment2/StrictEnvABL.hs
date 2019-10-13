@@ -95,6 +95,8 @@ evalABL env (Let1 v1 e1 e2) =
                       Just v2 -> Just v2
                       Nothing -> Nothing
        Nothing -> Nothing
+evalABL env (Fresh e1) = evalABL empty e1
+evalABL env (LetStar l1 e) = evalABL env (unfoldLetStar l1 e)
 
 
 -- Check if the ABL expression is well-scoped, that is if all variables are
@@ -128,13 +130,16 @@ scopeCheckAux vars (If e1 e2 e3) =
       Just (Bool False) -> scopeCheckAux vars e3
     False -> False
 scopeCheckAux vars (Let1 v1 e1 e2) = scopeCheckAux vars e1 && scopeCheckAux (v1 : vars) e2
+scopeCheckAux vars (Fresh e1) = scopeCheckAux vars e1
+scopeCheckAux vars (LetStar l1 e)
+  | l1 == empty = scopeCheckAux vars e
+  | vars == empty = scopeCheckAux l1 e
+  | otherwise = scopeCheckAux vars e || scopeCheckAux l1 e
 
 -- Helper function to express a series of bindings as a nested Let1 expression.
 unfoldLetStar :: [(Variable, ABLExpr)] -> ABLExpr -> ABLExpr
-unfoldLetStar [] e = undefined
-unfoldLetStar ((x, ex) : bindings) e = undefined
-{- TASK: replace `undefined` with the appropriate definitions -}
-
+unfoldLetStar [] e = e
+unfoldLetStar ((x, ex) : bindings) e = (Let1 x ex (unfoldLetStar bindings e))
 
 -- add your tests here
 tests :: IO ()
