@@ -26,7 +26,10 @@ applyIntegerBinOp f _ _ = Nothing
 -- Apply a binary boolean operation
 applyBoolBinOp :: BinOp Bool -> ABLValue -> ABLValue -> Maybe ABLValue
 applyBoolBinOp f (Bool b1) (Bool b2) = Just (Bool (f b1 b2))
-applyBoolBinOp (==) (Num b1) (Num b2) = Just (Bool (Just (Num 0)) == (Just evalABL [] (Sub (Val (Num b1)) (Val (Num b2)))))
+applyBoolBinOp (==) (Num n1) (Num n2) = 
+  case n1 - n2 of
+    0 -> Just (Bool True)
+    _ -> Just (Bool False)
 applyBoolBinOp f _ _ = Nothing
 
 -- Evaluate an ABL expression in the given environment
@@ -157,5 +160,20 @@ tests = do
   test "eval [(x, 3)] (if True (+ 2 10) (* 2 x))"
        (evalABL [("x", (Num 3))] (If (Val (Bool False)) (Add (Val (Num 2)) (Val (Num 10))) (Mul (Val (Num 2)) (Var "x"))))
        (Just (Num 6))
+  test "eval (eq 5 4)"
+       (evalABL [] (Eq (Val (Num 5)) (Val (Num 4))))
+       (Just (Bool False))
+  test "eval (eq 5 5)"
+       (evalABL [] (Eq (Val (Num 5)) (Val (Num 5))))
+       (Just (Bool True))
+  test "eval (eq True False)"
+       (evalABL [] (Eq (Val (Bool True)) (Val (Bool False))))
+       (Just (Bool False))
+  test "eval (eq True True)"
+       (evalABL [] (Eq (Val (Bool True)) (Val (Bool True))))
+       (Just (Bool True))
+  test "eval (eq False False)"
+       (evalABL [] (Eq (Val (Bool False)) (Val (Bool False))))
+       (Just (Bool True))
 ---------------------------- your helper functions --------------------------
 
