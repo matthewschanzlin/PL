@@ -52,8 +52,12 @@ showABL (Not e1) = "(not " ++ showABL e1 ++ ")"
 showABL (Let1 v1 e1 e2) = "(let1 (" ++ showABL (Var v1) ++ " " ++ showABL e1 ++ ") " ++ showABL e2 ++ ")"
 showABL (If e1 e2 e3) = "(if-else " ++ showABL e1 ++ " " ++ showABL e2 ++ " " ++ showABL e3 ++ ")"
 showABL (Fresh e1) = "(fresh-env " ++ showABL e1 ++ ")"
-showABL (LetStar [] e) = "(let1 () " ++ showABL e ++ ")"
-showABL (LetStar l e) = showABL (Let1 (fst (head l)) (snd (head l)) (LetStar (tail l) e))
+showABL (LetStar l e) = "(let* (" ++ showABLHelper l ++ ") " ++ showABL e ++ ")"
+
+showABLHelper :: [(Variable, ABLExpr)] -> String
+showABLHelper [] = ""
+showABLHelper ((v, e) : []) = "(" ++ showABL (Var v) ++ " " ++ showABL e ++ ")"
+showABLHelper ((v, e) : rest) = "(" ++ showABL (Var v) ++ " " ++ showABL e ++ ") " ++ showABLHelper rest
 
 -- add tests
 tests :: IO ()
@@ -72,6 +76,6 @@ tests = do
        "(let1 (x 5) (* x 10))"
   test "showABL let*"
        (showABL (LetStar [("x", (Val (Num 5))), ("y", (Val (Num 6)))] (Mul (Var "x") (Var "y"))))
-       "(let1 (x 5) (let1 (y 6) (let1 () (* x y))))"
+       "(let* ((x 5) (y 6)) (* x y))"
 
 ---------------------------- your helper functions --------------------------
