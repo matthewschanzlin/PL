@@ -128,7 +128,6 @@ scopeCheckAux vars (If e1 e2 e3) =
       Just (Bool False) -> scopeCheckAux vars e3
     False -> False
 scopeCheckAux vars (Let1 v1 e1 e2) = scopeCheckAux vars e1 && scopeCheckAux (v1 : vars) e2
-  {- TASK: complete the remaining equations -}
 
 -- Helper function to express a series of bindings as a nested Let1 expression.
 unfoldLetStar :: [(Variable, ABLExpr)] -> ABLExpr -> ABLExpr
