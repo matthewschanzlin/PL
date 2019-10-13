@@ -89,12 +89,12 @@ evalABL env (If e1 e2 e3) =
        Just (Bool True) -> evalABL env e2
        Just (Bool False) -> evalABL env e3
        Nothing -> Nothing
---evalABL env (Let1 e1 e2 e3) = 
---  case evalABL env e1 of
---       Just v1 -> case applyBoolBinOp (==) v1 (Bool True) of
---                      Just (Bool True) -> Just (Bool False)
---                      Just (Bool False) -> Just (Bool True)
---       Nothing -> Nothing
+evalABL env (Let1 e1 e2 e3) = 
+  case evalABL env e2 of
+       Just v1 -> case evalABL (add e1 v1 env) e3 of
+                      Just v2 -> Just v2
+                      Nothing -> Nothing
+       Nothing -> Nothing
 
 
 -- Check if the ABL expression is well-scoped, that is if all variables are 
@@ -175,5 +175,8 @@ tests = do
   test "eval (eq False False)"
        (evalABL [] (Eq (Val (Bool False)) (Val (Bool False))))
        (Just (Bool True))
+  test ("eval (let x 4 (* x x))")
+       (evalABL [] (Let1 "x" (Val (Num 4)) (Mul (Var "x") (Var "x"))))
+       (Just (Num 16))
 ---------------------------- your helper functions --------------------------
 
