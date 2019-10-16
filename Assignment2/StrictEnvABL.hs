@@ -208,24 +208,24 @@ tests = do
        Nothing
 
   test ("scopeCheck val")
-       (evalABL [] (Val 5))
-       (Just (Bool True))
+       (scopeCheckAux [] (Val (Num 5)))
+       True
   test ("scopeCheck var")
-       (evalABL [] (Var "x"))
-       (Just (Bool False))
+       (scopeCheckAux [] (Var "x"))
+       False
   test ("scopeCheck varY")
-       (evalABL ["y"] (Var "x"))
-       (Just (Bool False))
+       (scopeCheckAux ["y"] (Var "x"))
+       False
   test ("scopeCheck varX")
-       (evalABL ["x"] (Var "x"))
-       (Just (Bool True))
+       (scopeCheckAux ["x"] (Var "x"))
+       True
   test ("scopeCheck add")
-       (evalABL [] (Add (Val (Num 4) (Val (Num 5)))))
-       (Just (Bool True))
+       (scopeCheckAux [] (Add (Val (Num 4)) (Val (Num 5))))
+       True
   test ("scopeCheck addx")
-       (evalABL [] (Add (Val (Num 4) (Var "x"))))
-       (Just (Bool False))
+       (scopeCheckAux [] (Add (Val (Num 4)) (Var "x")))
+       False
   test ("scopeCheck addx")
-       (evalABL [("x",(Num 56)] (Add (Val (Num 4) (Var "x"))))
-       (Just (Bool True))
+       (scopeCheckAux ["x"] (Add (Val (Num 4)) (Var "x")))
+       True
 ---------------------------- your helper functions --------------------------
