@@ -77,5 +77,46 @@ tests = do
   test "showABL let*"
        (showABL (LetStar [("x", (Val (Num 5))), ("y", (Val (Num 6)))] (Mul (Var "x") (Var "y"))))
        "(let* ((x 5) (y 6)) (* x y))"
-
+  test "showABL var"
+       (showABL (Var "x"))
+       "x"
+  test "showABL add"
+       (showABL (Add (Val (Num 5)) (Val (Num 5))))
+       "(+ 5 5)"
+  test "showABL sub"
+       (showABL (Sub (Val (Num 5)) (Val (Num 5))))
+       "(- 5 5)"
+  test "showABL add"
+       (showABL (Add (Val (Num 5)) (Var "x")))
+       "(+ 5 x)"
+  test "showABL sub"
+       (showABL (Sub (Val (Num 5)) (Var "x")))
+       "(- 5 x)"
+  test "showABL mul"
+       (showABL (Mul (Val (Num 5)) (Val (Num 5))))
+       "(* 5 5)"
+  test "showABL div"
+       (showABL (Div (Val (Num 5)) (Val (Num 5))))
+       "(/ 5 5)"
+  test "showABL mul"
+       (showABL (Mul (Val (Num 5)) (Var "x")))
+       "(* 5 x)"
+  test "showABL div"
+       (showABL (Div (Val (Num 5)) (Var "x")))
+       "(/ 5 x)"
+  test "showABL or"
+       (showABL (Or (Val (Num 5)) (Val (Num 5))))
+       "(or 5 5)"
+  test "showABL and"
+       (showABL (And (Val (Num 5)) (Val (Num 5))))
+       "(and 5 5)"
+  test "showABL not"
+       (showABL (Not (Var "x")))
+       "(not x)"
+  test "showABL eq"
+       (showABL (Eq (Val (Num 5)) (Var "x")))
+       "(= 5 x)"
+  test "showABL if"
+       (showABL (If (Val (Bool True)) (Val (Num 5)) (Var "x")))
+       "(if-else true 5 x)"  
 ---------------------------- your helper functions --------------------------

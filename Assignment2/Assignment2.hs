@@ -13,11 +13,11 @@ import qualified StrictEnvABL (tests)
 -- For a single partner: (Just "Your Name", Nothing)
 -- For a pair: (Just "First Partner", Just "Second Partner")
 partners :: (Maybe String, Maybe String)
-partners = undefined
+partners = (Just "Matthew Schanzlin", Just "Nicholas Seidl")
 
 -- Please provide the total hours spent on this assignment
 hoursSpent :: (Int, Int)
-hoursSpent = (0, 0)
+hoursSpent = (7, 7)
 
 
 ---------------------------------------------------------------
@@ -27,4 +27,3 @@ allTests = do
   Env.tests
   ABL.tests
   StrictEnvABL.tests
-

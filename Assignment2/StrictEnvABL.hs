@@ -131,10 +131,9 @@ scopeCheckAux vars (If e1 e2 e3) =
     False -> False
 scopeCheckAux vars (Let1 v1 e1 e2) = scopeCheckAux vars e1 && scopeCheckAux (v1 : vars) e2
 scopeCheckAux vars (Fresh e1) = scopeCheckAux vars e1
-scopeCheckAux vars (LetStar l1 e)
-  | l1 == empty = scopeCheckAux vars e
-  | vars == empty = scopeCheckAux l1 e
-  | otherwise = scopeCheckAux vars e || scopeCheckAux l1 e
+scopeCheckAux vars (LetStar l e)
+  | l == empty = scopeCheckAux vars e
+  | otherwise = scopeCheckAux vars (Var (fst (head l))) && scopeCheckAux vars (LetStar (tail l) e)
 
 -- Helper function to express a series of bindings as a nested Let1 expression.
 unfoldLetStar :: [(Variable, ABLExpr)] -> ABLExpr -> ABLExpr
@@ -171,6 +170,12 @@ tests = do
   test "eval (not (&& True True))"
        (evalABL empty (Not (And (Val (Bool True)) (Val (Bool True)))))
        (Just (Bool False))
+  test "eval (not (|| False False))"
+       (evalABL empty (Not (Or (Val (Bool False)) (Val (Bool False)))))
+       (Just (Bool True))
+  test "eval (not (|| True True))"
+       (evalABL empty (Not (Or (Val (Bool True)) (Val (Bool True)))))
+       (Just (Bool False))
   test "eval (if True (+ 2 10) (* 2 10))"
        (evalABL empty (If (Val (Bool True)) (Add (Val (Num 2)) (Val (Num 10))) (Mul (Val (Num 2)) (Val (Num 10)))))
        (Just (Num 12))
@@ -195,4 +200,32 @@ tests = do
   test ("eval (let (x 4) (* x x))")
        (evalABL [] (Let1 "x" (Val (Num 4)) (Mul (Var "x") (Var "x"))))
        (Just (Num 16))
+  test ("eval (let* ((x 4) (y 5)) (* x y))")
+       (evalABL [] (LetStar [("x", (Val (Num 4))),("y", (Val (Num 5)))] (Mul (Var "x") (Var "y"))))
+       (Just (Num 20))
+  test ("eval (fresh-env env)")
+       (evalABL [("x", (Num 6)),("x", (Num 7))] (Fresh (Let1 "y" (Val (Num 3)) (Add (Var "x") (Var "y")))))
+       Nothing
+
+  test ("scopeCheck val")
+       (evalABL [] (Val 5))
+       (Just (Bool True))
+  test ("scopeCheck var")
+       (evalABL [] (Var "x"))
+       (Just (Bool False))
+  test ("scopeCheck varY")
+       (evalABL ["y"] (Var "x"))
+       (Just (Bool False))
+  test ("scopeCheck varX")
+       (evalABL ["x"] (Var "x"))
+       (Just (Bool True))
+  test ("scopeCheck add")
+       (evalABL [] (Add (Val (Num 4) (Val (Num 5)))))
+       (Just (Bool True))
+  test ("scopeCheck addx")
+       (evalABL [] (Add (Val (Num 4) (Var "x"))))
+       (Just (Bool False))
+  test ("scopeCheck addx")
+       (evalABL [("x",(Num 56)] (Add (Val (Num 4) (Var "x"))))
+       (Just (Bool True))
 ---------------------------- your helper functions --------------------------
