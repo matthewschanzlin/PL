@@ -2,7 +2,7 @@
 Module      :  Assignment2
 Description :  Assignment 2 meta-file.
 
-Maintainer  :  Your Name <your email>
+Maintainer  :  Matthew Schanzlin <schanzlin.ma@husky.neu.edu> Nicholas Seidl <seidl.n@husky.neu.edu>
 -}
 
 import qualified Env (tests)
@@ -17,7 +17,7 @@ partners = (Just "Matthew Schanzlin", Just "Nicholas Seidl")
 
 -- Please provide the total hours spent on this assignment
 hoursSpent :: (Int, Int)
-hoursSpent = (7, 7)
+hoursSpent = (10, 10)
 
 
 ---------------------------------------------------------------
