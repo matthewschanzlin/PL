@@ -2,7 +2,7 @@
 Module      :  StrictEnvABL
 Description :  A strict, environment-based implementation of ABL.
 
-Maintainer  :  Your Name <your email>
+Maintainer  :  Nicholas Seidl <Nicholas Seidl seidl.n@husky.neu.edu>, Matthew Schanzlin <Matthew Schanzlin <schanzlin.ma@husky.neu.edu>
 -}
 
 module StrictEnvABL where

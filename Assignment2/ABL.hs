@@ -2,7 +2,7 @@
 Module      :  ABL
 Description :  Syntax of the ABL language.
 
-Maintainer  :  Nicholas Seidl <seidl.n@husky.neu.edu>, Matthew Schanzlin <Matthew Schanzlin <schanzlin.ma@husky.neu.edu>
+Maintainer  :  Nicholas Seidl <Nicholas Seidl seidl.n@husky.neu.edu>, Matthew Schanzlin <Matthew Schanzlin <schanzlin.ma@husky.neu.edu>
 -}
 
 module ABL where
@@ -46,18 +46,13 @@ showABL (Sub e1 e2) = "(- " ++ showABL e1 ++ " " ++ showABL e2 ++ ")"
 showABL (Mul e1 e2) = "(* " ++ showABL e1 ++ " " ++ showABL e2 ++ ")"
 showABL (Div e1 e2) = "(/ " ++ showABL e1 ++ " " ++ showABL e2 ++ ")"
 showABL (Eq e1 e2) = "(= " ++ showABL e1 ++ " " ++ showABL e2 ++ ")"
-showABL (And e1 e2) = "(and " ++ showABL e1 ++ " " ++ showABL e2 ++ ")"
-showABL (Or e1 e2) = "(or " ++ showABL e1 ++ " " ++ showABL e2 ++ ")"
+showABL (And e1 e2) = "(&& " ++ showABL e1 ++ " " ++ showABL e2 ++ ")"
+showABL (Or e1 e2) = "(|| " ++ showABL e1 ++ " " ++ showABL e2 ++ ")"
 showABL (Not e1) = "(not " ++ showABL e1 ++ ")"
 showABL (Let1 v1 e1 e2) = "(let1 (" ++ showABL (Var v1) ++ " " ++ showABL e1 ++ ") " ++ showABL e2 ++ ")"
 showABL (If e1 e2 e3) = "(if-else " ++ showABL e1 ++ " " ++ showABL e2 ++ " " ++ showABL e3 ++ ")"
 showABL (Fresh e1) = "(fresh-env " ++ showABL e1 ++ ")"
 showABL (LetStar l e) = "(let* (" ++ showABLHelper l ++ ") " ++ showABL e ++ ")"
-
-showABLHelper :: [(Variable, ABLExpr)] -> String
-showABLHelper [] = ""
-showABLHelper ((v, e) : []) = "(" ++ showABL (Var v) ++ " " ++ showABL e ++ ")"
-showABLHelper ((v, e) : rest) = "(" ++ showABL (Var v) ++ " " ++ showABL e ++ ") " ++ showABLHelper rest
 
 -- add tests
 tests :: IO ()
@@ -106,10 +101,10 @@ tests = do
        "(/ 5 x)"
   test "showABL or"
        (showABL (Or (Val (Num 5)) (Val (Num 5))))
-       "(or 5 5)"
+       "(|| 5 5)"
   test "showABL and"
        (showABL (And (Val (Num 5)) (Val (Num 5))))
-       "(and 5 5)"
+       "(&& 5 5)"
   test "showABL not"
        (showABL (Not (Var "x")))
        "(not x)"
@@ -120,3 +115,7 @@ tests = do
        (showABL (If (Val (Bool True)) (Val (Num 5)) (Var "x")))
        "(if-else true 5 x)"  
 ---------------------------- your helper functions --------------------------
+showABLHelper :: [(Variable, ABLExpr)] -> String
+showABLHelper [] = ""
+showABLHelper ((v, e) : []) = "(" ++ showABL (Var v) ++ " " ++ showABL e ++ ")"
+showABLHelper ((v, e) : rest) = "(" ++ showABL (Var v) ++ " " ++ showABL e ++ ") " ++ showABLHelper rest
