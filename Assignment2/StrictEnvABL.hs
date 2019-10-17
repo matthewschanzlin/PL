@@ -228,4 +228,73 @@ tests = do
   test ("scopeCheck addx")
        (scopeCheckAux ["x"] (Add (Val (Num 4)) (Var "x")))
        True
+  test ("scopeCheck addx")
+       (scopeCheckAux ["x"] (Add (Val (Num 4)) (Var "x")))
+       True
+  test ("scopeCheck addx")
+       (scopeCheckAux ["x"] (Add (Val (Num 4)) (Var "y")))
+       False
+  test ("scopeCheck sub")
+       (scopeCheckAux ["x"] (Sub (Var "y") (Val (Num 4))))
+       False
+  test ("scopeCheck sub")
+       (scopeCheckAux ["x"] (Sub (Var "x") (Val (Num 4))))
+       True
+  test ("scopeCheck mul")
+       (scopeCheckAux ["x"] (Mul (Val (Num 4)) (Var "x")))
+       True
+  test ("scopeCheck div")
+       (scopeCheckAux ["x"] (Div (Val (Num 4)) (Var "y")))
+       False
+  test ("scopeCheck and")
+       (scopeCheckAux ["x"] (And (Var "y") (Val (Num 4))))
+       False
+  test ("scopeCheck or")
+       (scopeCheckAux ["x"] (Or (Var "x") (Val (Num 4))))
+       True
+  test ("scopeCheck not")
+       (scopeCheckAux ["x"] (Not (Var "y")))
+       False
+  test ("scopeCheck eq")
+       (scopeCheckAux ["x"] (Eq (Var "x") (Val (Num 4))))
+       True
+  test ("scopeCheck if")
+       (scopeCheckAux ["x"] (If (Val (Bool False)) (Val (Num 4)) (Var "y")))
+       False
+  test ("scopeCheck if")
+       (scopeCheckAux ["y", "x"] (If (Val (Bool False)) (Val (Num 4)) (Var "x")))
+       True
+  test ("scopeCheck if")
+       (scopeCheckAux ["x"] (If (Val (Bool True)) (Val (Num 4)) (Var "y")))
+       True
+  test ("scopeCheck let1")
+       (scopeCheckAux ["x"] (Let1 "y" (Val (Num 4)) (Mul (Var "x") (Var "x"))))
+       True
+  test ("scopeCheck let1")
+       (scopeCheckAux ["x"] (Let1 "y" (Val (Num 4)) (Mul (Var "y") (Var "x"))))
+       True
+  test ("scopeCheck let1")
+       (scopeCheckAux ["x"] (Let1 "y" (Val (Num 4)) (Mul (Var "z") (Var "x"))))
+       False
+  test ("scopeCheck fresh")
+       (scopeCheckAux ["x"] (Fresh (Var "x")))
+       True
+  test ("scopeCheck fresh")
+       (scopeCheckAux ["y"] (Fresh (Var "x")))
+       False
+  test ("scopeCheck let*")
+       (scopeCheckAux ["x","y","z"] (LetStar [] (Mul (Val (Num 45)) (Val (Num 56)))))
+       True
+  test ("scopeCheck let*")
+       (scopeCheckAux ["x","y","z"] (LetStar [] (Mul (Var "x") (Val (Num 56)))))
+       True
+  test ("scopeCheck let*")
+       (scopeCheckAux ["x","y","z"] (LetStar [] (Mul (Var "r") (Val (Num 56)))))
+       False
+  test ("scopeCheck let*")
+       (scopeCheckAux ["x","y","z"] (LetStar [("x", (Val (Num 5))),("y", (Val (Num 7))),("z", (Val (Num 4)))] (Mul (Var "x") (Val (Num 56)))))
+       True
+  test ("scopeCheck let*")
+       (scopeCheckAux ["x","y","z"] (LetStar [("x", (Val (Num 5))),("r", (Val (Num 7))),("z", (Val (Num 4)))] (Mul (Var "x") (Val (Num 56)))))
+       False
 ---------------------------- your helper functions --------------------------
