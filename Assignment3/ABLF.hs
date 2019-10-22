@@ -3,7 +3,7 @@ Module      :  ABLF
 Description :  Syntax of the ABLF language and a translation function to pure 
                lambda calculus.
 
-Maintainer  :  Your Name <your email>
+Maintainer  :  Nicholas Seidl <seidl.n@husky.neu.edu>, Matthew Schanzlin <schanzlin.ma@husky.neu.edu>
 -}
 
 

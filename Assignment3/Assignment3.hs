@@ -2,7 +2,7 @@
 Module      :  Assignment3
 Description :  Assignment 3 meta-file.
 
-Maintainer  :  Your Name <your email>
+Maintainer  :  Nicholas Seidl <seidl.n@husky.neu.edu>, Matthew Schanzlin <schanzlin.ma@husky.neu.edu>
 -}
 module Assignment3 where
 

@@ -3,7 +3,7 @@ Module      :  Church
 Description :  Church encodings of booleans and natural numbers. 
                Fixpoint operator.
 
-Maintainer  :  Your Name <your email>
+Maintainer  :  Nicholas Seidl <Nicholas Seidl seidl.n@husky.neu.edu>, Matthew Schanzlin <Matthew Schanzlin <schanzlin.ma@husky.neu.edu>
 -}
 
 
@@ -15,10 +15,17 @@ import Reduce
 import SimpleTests
 
 toChurchBool :: Bool -> Lambda
-toChurchBool _ = undefined
+toChurchBool b = 
+  if b == True 
+    then (Lam "t" (Lam "f" (Var "t")))
+    else (Lam "t" (Lam "f" (Var "f")))
 
 fromChurchBool :: Lambda -> Maybe Bool
-fromChurchBool _ = undefined
+fromChurchBool (Lam var (Lam var' (Var var''))) =
+  if var == var''
+    then Just True
+    else Just False
+fromChurchBool _ = Nothing
 
 toNumeral :: Integer -> Lambda
 toNumeral _ = undefined
@@ -82,14 +89,27 @@ fix = undefined
 
 tests :: IO ()
 tests = do
-  test "toNumeral -> fromNumeral"
-       (fromNumeral (toNumeral 10)) 
-       (Just 10)
-  -- ...
-  test "plus 3 5 --> 8"
-       (fromNumeral (normalize (App (App cplus (toNumeral 3)) (toNumeral 5))))
-       (Just (3 + 5))
-
-
+  --test "toNumeral -> fromNumeral"
+  --     (fromNumeral (toNumeral 10)) 
+  --     (Just 10)
+  ---- ...
+  --test "plus 3 5 --> 8"
+  --     (fromNumeral (normalize (App (App cplus (toNumeral 3)) (toNumeral 5))))
+  --     (Just (3 + 5))
+  test "toChurchBool True"
+    (toChurchBool True)
+    (Lam "t" (Lam "f" (Var "t")))
+  test "toChurchBool False"
+    (toChurchBool False)
+    (Lam "t" (Lam "f" (Var "f")))
+  test "fromChurchBool churchFalse"
+    (fromChurchBool (Lam "t" (Lam "f" (Var "f"))))
+    (Just False)
+  test "fromChurchBool chuchTrue"
+    (fromChurchBool (Lam "t" (Lam "f" (Var "t"))))
+    (Just True)
+  test "fromChurchBool nonCanonical"
+    (fromChurchBool (Lam "t" (Lam "f" (Lam "q" (Var "t")))))
+    (Nothing)
 ---------------------------- your helper functions --------------------------
 
