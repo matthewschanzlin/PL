@@ -28,10 +28,16 @@ fromChurchBool (Lam var (Lam var' (Var var''))) =
 fromChurchBool _ = Nothing
 
 toNumeral :: Integer -> Lambda
-toNumeral _ = undefined
+toNumeral 0 = (Var "z")
+toNumeral n = (Lam "s" (toNumeral (n - 1)))
 
 fromNumeral :: Lambda -> Maybe Integer
-fromNumeral _ = undefined
+fromNumeral (Var var) = Just 0
+fromNumeral (Lam var lam) = 
+  case fromNumeral lam of
+    Just v -> Just (1 + v)
+    Nothing -> Nothing
+fromNumeral _ = Nothing
 
 csucc :: Lambda
 csucc = Lam "n" (Lam "s" (Lam "z" 
