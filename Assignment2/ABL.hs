@@ -119,3 +119,8 @@ showABLHelper :: [(Variable, ABLExpr)] -> String
 showABLHelper [] = ""
 showABLHelper ((v, e) : []) = "(" ++ showABL (Var v) ++ " " ++ showABL e ++ ")"
 showABLHelper ((v, e) : rest) = "(" ++ showABL (Var v) ++ " " ++ showABL e ++ ") " ++ showABLHelper rest
+
+
+
+
+
