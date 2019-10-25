@@ -55,30 +55,30 @@ cpred = Lam "n" (Lam "f" (Lam "x" (
 
 -- operations on numerals
 cplus :: Lambda    -- addition
-cplus = undefined
+cplus = (Lam "m" (Lam "n" (App (Var "m") csucc)))
 
 cminus :: Lambda   -- subtraction
-cminus = undefined
+cminus = (Lam "m" (Lam "n" (App cpred (Var "m"))))
 
 ctimes :: Lambda   -- multiplication
-ctimes = undefined
+ctimes = (Lam "m" (Lam "n" (App (Var "m") csucc)))
 
 -- operations on Church booleans
 cand :: Lambda
-cand = undefined
+cand = (Lam "a" (Lam "b" (App (App (Var "a") (Var "b")) (toChurchBool False))))
 
 cor :: Lambda 
-cor = undefined
+cor = (Lam "a" (Lam "b" (App (App (Var "a") (toChurchBool True)) (Var "b"))))
 
 cnot :: Lambda
-cnot = undefined
+cnot = (Lam "b" (App (App (Var "b") (toChurchBool False)) (toChurchBool True)))
 
 -- operations on numerals returning Church booleans
 ciszero :: Lambda
-ciszero = undefined
+ciszero = (Lam "n" (App (App (Var "n") (Lam "x" (toChurchBool False))) (toChurchBool True)))
 
 cleq :: Lambda     -- less or equal
-cleq = undefined
+cleq = (Lam "m" (Lam "n" (App ciszero cminus)))
 
 ceq :: Lambda      -- equal
 ceq = undefined
