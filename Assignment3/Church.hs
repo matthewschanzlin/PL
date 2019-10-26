@@ -28,15 +28,24 @@ fromChurchBool (Lam var (Lam var' (Var var''))) =
 fromChurchBool _ = Nothing
 
 toNumeral :: Integer -> Lambda
-toNumeral 0 = (Var "z")
-toNumeral n = (Lam "s" (toNumeral (n - 1)))
+toNumeral 0 = Lam "s" (Lam "z" (Var "z"))
+toNumeral n = Lam "s" (Lam "z" (toNumeralHelper n))
+
+toNumeralHelper :: Integer -> Lambda
+toNumeralHelper 1 = (App (Var "s") (Var "z"))
+toNumeralHelper n = (App (Var "s") (toNumeralHelper (n - 1)))
 
 fromNumeral :: Lambda -> Maybe Integer
-fromNumeral (Var var) = Just 0
-fromNumeral (Lam var lam) = 
-  case fromNumeral lam of
-    Just v -> Just (1 + v)
-    Nothing -> Nothing
+fromNumeral (Lam s (Lam z (Var z'))) = 
+  if z == z'
+    then Just 0
+    else Nothing
+fromNumeral (Lam s (Lam z (App (Var s') lam))) =
+  if s == s'
+    then case fromNumeral (Lam s (Lam z lam)) of
+      Just v -> Just (1 + v)
+      Nothing -> Nothing
+    else Nothing
 fromNumeral _ = Nothing
 
 csucc :: Lambda
@@ -55,13 +64,13 @@ cpred = Lam "n" (Lam "f" (Lam "x" (
 
 -- operations on numerals
 cplus :: Lambda    -- addition
-cplus = (Lam "m" (Lam "n" (App (Var "m") csucc)))
+cplus = (Lam "m" (Lam "n" (App (App (Var "m") csucc) (Var "n"))))
 
 cminus :: Lambda   -- subtraction
-cminus = (Lam "m" (Lam "n" (App cpred (Var "m"))))
+cminus = (Lam "m" (Lam "n" (App (App (Var "n") cpred) (Var "m"))))
 
 ctimes :: Lambda   -- multiplication
-ctimes = (Lam "m" (Lam "n" (App (Var "m") csucc)))
+ctimes = (Lam "m" (Lam "n" (App (App (Var "m") (App cplus (Var "n"))) (toNumeral 0))))
 
 -- operations on Church booleans
 cand :: Lambda
@@ -78,18 +87,27 @@ ciszero :: Lambda
 ciszero = (Lam "n" (App (App (Var "n") (Lam "x" (toChurchBool False))) (toChurchBool True)))
 
 cleq :: Lambda     -- less or equal
-cleq = (Lam "m" (Lam "n" (App ciszero cminus)))
+cleq = (Lam "m" (Lam "n" (App ciszero (App (App cminus (Var "m")) (Var "n")))))
 
 ceq :: Lambda      -- equal
-ceq = undefined
+ceq = (Lam "m" (Lam "n" (App (App cand leqmn) leqnm)))
+
+leqmn :: Lambda
+leqmn = (App (App cleq (Var "m")) (Var "n"))
+
+leqnm :: Lambda
+leqnm = (App (App cleq (Var "n")) (Var "m"))
 
 -- conditional expression
 cifthen :: Lambda
-cifthen = undefined
+cifthen = (Lam "b" (Lam "x" (Lam "y" (App (App (Var "b") (Var "x")) (Var "y")))))
 
 -- fixpoint combinator
 fix :: Lambda
-fix = undefined
+fix = (Lam "f" (App lamxfxx lamxfxx))
+
+lamxfxx :: Lambda
+lamxfxx = (Lam "x" (App (Var "f") (App (Var "x") (Var "x"))))
 
 ------ tests go here
 
