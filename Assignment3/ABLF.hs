@@ -43,7 +43,18 @@ data ABLFExpr = AVar Variable
 translate :: ABLFExpr -> Lambda
 translate (Num i) = toNumeral i
 translate (Add e1 e2) = App (App cplus (translate e1)) (translate e2)
-translate _ = undefined
+translate (Sub e1 e2) = App (App cminus (translate e1)) (translate e2)
+translate (Mul e1 e2) = App (App ctimes (translate e1)) (translate e2)
+
+translate (Bool b) = toChurchBool b
+translate (And e1 e2) = App (App cand (translate e1)) (translate e2)
+translate (Or e1 e2) = App (App cor (translate e1)) (translate e2)
+translate (Not e1) = App cnot (translate e1)
+
+translate (Leq e1 e2) = App (App cleq (translate e1)) (translate e2)
+translate (Eq e1 e2) = App (App ceq (translate e1)) (translate e2)
+translate (IfThen e1 e2 e3) = App (App (App cifthen (translate e1)) (translate e2)) (translate e3)
+translate (Let v e1 e2) = App (Lam "x" (translate e2)) (translate e1)
 
 factorialOf :: Integer -> ABLFExpr
 factorialOf n = undefined
