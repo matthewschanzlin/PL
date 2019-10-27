@@ -56,8 +56,10 @@ translate (Eq e1 e2) = App (App ceq (translate e1)) (translate e2)
 translate (IfThen e1 e2 e3) = App (App (App cifthen (translate e1)) (translate e2)) (translate e3)
 translate (Let v e1 e2) = App (Lam "x" (translate e2)) (translate e1)
 
-translate (LetFun var vars e1 e2) = (Var "damn")
-translate (Call var exprs) = (Var "rip")
+translate (LetFun var vars e1 e2) = (Var "this is so hard")
+
+translate (Call var (expr:[])) = (App (Var var) (translate expr))
+translate (Call var exprs) = (App (App (Var var) (translate (head exprs))) (translate (Call var (tail exprs))))
 
 factorialOf :: Integer -> ABLFExpr
 factorialOf n = undefined
