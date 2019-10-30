@@ -36,11 +36,12 @@ data ABLFExpr = AVar Variable
               | Let Variable ABLFExpr ABLFExpr     -- let x = e1 in e2
 
               -- recursive function definitions
-              | LetFun Variable [Variable] ABLFExpr ABLFExpr
+              | LetFun Variable [Variable] ABLFExpr ABLFExpr --let x [a, b, c] = e1 in e2
               -- function application
               | Call Variable [ABLFExpr]
 
 translate :: ABLFExpr -> Lambda
+translate (AVar var) = Var var
 translate (Num i) = toNumeral i
 translate (Add e1 e2) = App (App cplus (translate e1)) (translate e2)
 translate (Sub e1 e2) = App (App cminus (translate e1)) (translate e2)
@@ -56,10 +57,10 @@ translate (Eq e1 e2) = App (App ceq (translate e1)) (translate e2)
 translate (IfThen e1 e2 e3) = App (App (App cifthen (translate e1)) (translate e2)) (translate e3)
 translate (Let v e1 e2) = App (Lam "x" (translate e2)) (translate e1)
 
-translate (Call var (expr:[])) = (App (Var var) (translate expr))
-translate (Call var exprs) = (Call (App (Var var) (translate (head exprs))) (tail exprs))
+translate (Call var (expr:[])) = App (translate expr) (Var var)
+translate (Call var exprs) = App (translate (Call var (tail exprs))) (App (translate (head exprs)) (Var var))
 
-translate (LetFun var vars e1 e2) = (Var "this is so hard")
+translate (LetFun var vars e1 e2) = (Var "?")
 
 factorialOf :: Integer -> ABLFExpr
 factorialOf n = undefined
