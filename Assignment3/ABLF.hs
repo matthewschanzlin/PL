@@ -1,6 +1,6 @@
 {- |
 Module      :  ABLF
-Description :  Syntax of the ABLF language and a translation function to pure 
+Description :  Syntax of the ABLF language and a translation function to pure
                lambda calculus.
 
 Maintainer  :  Nicholas Seidl <seidl.n@husky.neu.edu>, Matthew Schanzlin <schanzlin.ma@husky.neu.edu>
@@ -30,7 +30,7 @@ data ABLFExpr = AVar Variable
 
               | Leq ABLFExpr ABLFExpr   -- Leq n m: "Is n less or equal to m?"
               | Eq ABLFExpr ABLFExpr    -- Eq n m: "Is n equal to m?"
-     
+
               | IfThen ABLFExpr ABLFExpr ABLFExpr  -- conditional expression
 
               | Let Variable ABLFExpr ABLFExpr     -- let x = e1 in e2
@@ -63,8 +63,9 @@ translate (Call var exprs) = App (translate (Call var (tail exprs))) (App (trans
 translate (LetFun var vars e1 e2) = (Var "?")
 
 factorialOf :: Integer -> ABLFExpr
-factorialOf n = undefined
-
+factorialOf 0 = (Num 1)
+facotrialOf 1 = (Num 1)
+facotrialOf n = (Mul (factorialOf (Sub (Num n) (Num 1))) (Num n)) 
 ---- tests
 
 tests :: IO ()
@@ -75,4 +76,3 @@ tests = do
 
 
 ---------------------------- your helper functions --------------------------
-
