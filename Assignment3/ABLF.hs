@@ -61,6 +61,11 @@ translate (Call var []) = Var var
 translate (Call var exprs) = App (translate (Call var (init exprs))) (translate (last exprs))
 
 -- let rec f x y z = e1 in e2 LetFun "f" ["x", "y", "z"] e1 e2
+-- LetFun "f" ["x", "y", "z"] e1 e2
+-- let rec f x y z = e1 in e2
+-- let rec f = lam x y z. e1 in e2
+-- let f = fix (λf. λx y z. e1) in e2
+-- (λf. e2) (fix (λf. λx y z. e1))
 translate (LetFun var [] e1 e2) = translate (Let var e1 e2)
 translate (LetFun var vars e1 e2) = App (Lam var (translate e2)) 
                                         (App fix (Lam var (mulArgToSingleArg vars e1)))
@@ -70,21 +75,19 @@ mulArgToSingleArg [] e = translate e
 mulArgToSingleArg vars e = (Lam (head vars) (mulArgToSingleArg (tail vars) e))
 
 factorialOf :: Integer -> ABLFExpr
-factorialOf 0 = (Num 1)
---factorialOf n = App ... (Call n ...) ..
-
---factorialOf :: Integer -> ABLFExpr
---fact0 = (Lam "f" (Lam "n" (IfThen (App ciszero (Var "n")) 
---                                  (Num 1)
---                                  (Mul (Var "n") (App (Var "f") (App cpred n))))))
---factorialOf = App fix fact0
----- tests
+factorialOf n = (LetFun "fact" ["n"] (IfThen (Eq (Num 0) (AVar "n")) 
+                                      (Num 1)
+                                      (Mul (AVar "n") (Call "fact" [(Sub (AVar "n") (Num 1))])))
+                                    (Call "fact" [(Num n)]))
 
 tests :: IO ()
 tests = do
   test "translate (Num 10)"
        (fromNumeral (translate (Num 10)))
        (Just 10)
+  test "translate 4-2"
+    (fromNumeral (normalize (translate (Sub (Num 4) (Num 1)))))
+    (Just 3)
   test "call"
         (translate (Call "f" [(AVar "x"), (AVar "y"), (AVar "z")]))
         (App (App (App (Var "f") (Var "x")) (Var "y")) (Var "z"))
@@ -94,9 +97,13 @@ tests = do
   test "letfun advanced"
         (translate (LetFun "f" ["x"] (Num 0) (Call "f" [(AVar "x")])))
         (App (Lam "f" (App (Var "f") (Var "x"))) (App (Lam "f" (App (Lam "x" (App (Var "f") (App (Var "x") (Var "x")))) (Lam "x" (App (Var "f") (App (Var "x") (Var "x")))))) (Lam "f" (Lam "x" (Lam "s" (Lam "z" (Var "z")))))))
--- LetFun "f" ["x", "y", "z"] e1 e2
--- let rec f x y z = e1 in e2
--- let rec f = lam x y z. e1 in e2
--- let f = fix (λf. λx y z. e1) in e2
--- (λf. e2) (fix (λf. λx y z. e1))
+  test "fact 0"
+        (fromNumeral (normalize (translate (factorialOf 0))))
+        (Just 1)
+  test "fact 1"
+        (fromNumeral (normalize (translate (factorialOf 1))))
+        (Just 1)
+  test "fact 2"
+        (fromNumeral (normalize (translate (factorialOf 2))))
+        (Just 2)
 ---------------------------- your helper functions --------------------------
