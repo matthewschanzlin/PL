@@ -13,19 +13,19 @@ import qualified Church (tests)
 -- For a single partner: (Just "Your Name", Nothing)
 -- For a pair: (Just "First Partner", Just "Second Partner")
 partners :: (Maybe String, Maybe String)
-partners = undefined
+partners = (Just "Matthew Schanzlin", Just "Nicholas Seidl")
 
 -- Please provide the total hours spent on this assignment
 hoursSpent :: (Int, Int)
-hoursSpent = (0, 0)
+hoursSpent = (20, 20)
 
 -- For Exercise 7, for each number below, fill in how many reduction steps a 
 -- factorial of that number needed to reach a normal form.
 factorialSteps =
-  [ (1, undefined)
-  , (2, undefined)
-  , (3, undefined)
-  , (4, undefined)
+  [ (1, 104)
+  , (2, 393)
+  , (3, 1824)
+  , (4, 10207)
   , (5, undefined)
   ]
 ---------------------------------------------------------------
