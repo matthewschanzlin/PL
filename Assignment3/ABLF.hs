@@ -67,7 +67,7 @@ translate (Call var exprs) = App (translate (Call var (init exprs))) (translate 
 -- let f = fix (λf. λx y z. e1) in e2
 -- (λf. e2) (fix (λf. λx y z. e1))
 translate (LetFun var [] e1 e2) = translate (Let var e1 e2)
-translate (LetFun var vars e1 e2) = App (Lam var (translate e2)) 
+translate (LetFun var vars e1 e2) = App (Lam var (translate e2))
                                         (App fix (Lam var (mulArgToSingleArg vars e1)))
 
 mulArgToSingleArg :: [Variable] -> ABLFExpr -> Lambda
@@ -75,7 +75,7 @@ mulArgToSingleArg [] e = translate e
 mulArgToSingleArg vars e = (Lam (head vars) (mulArgToSingleArg (tail vars) e))
 
 factorialOf :: Integer -> ABLFExpr
-factorialOf n = (LetFun "fact" ["n"] (IfThen (Eq (Num 0) (AVar "n")) 
+factorialOf n = (LetFun "fact" ["n"] (IfThen (Eq (Num 0) (AVar "n"))
                                       (Num 1)
                                       (Mul (AVar "n") (Call "fact" [(Sub (AVar "n") (Num 1))])))
                                     (Call "fact" [(Num n)]))
@@ -88,6 +88,33 @@ tests = do
   test "translate 4-2"
     (fromNumeral (normalize (translate (Sub (Num 4) (Num 1)))))
     (Just 3)
+  test "translate Add"
+    (fromNumeral (normalize (translate (Add (Num 4) (Num 1)))))
+    (Just 5)
+  test "translate Mul"
+    (fromNumeral (normalize (translate (Mul (Num 4) (Num 1)))))
+    (Just 4)
+  test "translate Bool"
+    (fromNumeral (normalize (translate (Bool True))))
+    Nothing
+  test "translate And"
+    (fromNumeral (normalize (translate (And (Eq (Num 4) (Num 1)) (Eq (Num 4) (Num 1))))))
+    (Just 0)
+  test "translate Or"
+    (fromNumeral (normalize (translate (Or (Eq (Num 4) (Num 1)) (Eq (Num 4) (Num 1))))))
+    (Just 0)
+  test "translate Not"
+    (fromNumeral (normalize (translate (Not (Eq (Num 4) (Num 1))))))
+    Nothing
+  test "translate Leq"
+    (fromNumeral (normalize (translate (Leq (Num 4) (Num 1)))))
+    (Just 0)
+  test "translate Eq"
+    (fromNumeral (normalize (translate (Eq (Num 4) (Num 1)))))
+    (Just 0)
+  test "translate Let"
+    (fromNumeral (normalize (translate (Let "v" (Num 4) (Num 1)))))
+    (Just 1)
   test "call"
         (translate (Call "f" [(AVar "x"), (AVar "y"), (AVar "z")]))
         (App (App (App (Var "f") (Var "x")) (Var "y")) (Var "z"))
@@ -107,3 +134,15 @@ tests = do
         (fromNumeral (normalize (translate (factorialOf 2))))
         (Just 2)
 ---------------------------- your helper functions --------------------------
+  test "mulArgToSingleArg base case"
+        (mulArgToSingleArg [] (Num 2))
+        (Lam "s" (Lam "z" (App (Var "s") (App (Var "s") (Var "z")))))
+  test "mulArgToSingleArg hard"
+        (mulArgToSingleArg ["x", "y", "z", "b", "c"] (Num 2))
+        (Lam "x" (Lam "y" (Lam "z" (Lam "b" (Lam "c" (Lam "s" (Lam "z" (App (Var "s") (App (Var "s") (Var "z"))))))))))
+  test "mulArgToSingleArg basic"
+        (mulArgToSingleArg ["x"] (Num 2))
+        (Lam "x" (Lam "s" (Lam "z" (App (Var "s") (App (Var "s") (Var "z"))))))
+  test "mulArgToSingleArg advanced"
+        (mulArgToSingleArg ["x", "y", "z"] (Num 2))
+        (Lam "x" (Lam "y" (Lam "z" (Lam "s" (Lam "z" (App (Var "s") (App (Var "s") (Var "z"))))))))
