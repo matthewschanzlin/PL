@@ -2,7 +2,7 @@
 Module      :  MiniImp
 Description :  Implementation of the MiniImp language.
 
-Maintainer  :  Your Name <your email>
+Maintainer  :  Nicholas Seidl <seidl.n@husky.neu.edu>, Matthew Schanzlin <schanzlin.ma@husky.neu.edu>
 -}
 
 module MiniImp where
