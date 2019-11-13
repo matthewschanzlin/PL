@@ -109,12 +109,11 @@ execStmt (Print e, sto, i) =
   do v <- evalExpr sto e
      return (sto, i, [v])
 execStmt (While e c, sto, i) =
-  do Bool b <- evalExpr sto e
-     case b of
-       False -> Just (sto, i, [])
-       True -> case execStmt (c, sto, i) of
-         Just (sto', in1, out1) -> case execStmt (While e c, sto', in1) of
-           Just (sto'', in2, out2) -> return (sto'', in2, out1 ++ out2)
+  case evalExpr sto e of
+    Just (Bool False) -> Just (sto, i, [])
+    Just (Bool True) -> case execStmt (c, sto, i) of
+      Just (sto', in1, out1) -> case execStmt (While e c, sto', in1) of
+        Just (sto'', in2, out2) -> return (sto'', in2, out1 ++ out2)
 
       
 -- complete the definition
