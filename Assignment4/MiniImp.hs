@@ -114,7 +114,15 @@ execStmt (While e c, sto, i) =
     Just (Bool True) -> case execStmt (c, sto, i) of
       Just (sto', in1, out1) -> case execStmt (While e c, sto', in1) of
         Just (sto'', in2, out2) -> return (sto'', in2, out1 ++ out2)
-
+execStmt (If expr st1 st2, sto, i) =
+  case evalExpr sto expr of
+    Just (Bool True) -> case execStmt (st1, sto, i) of
+      Just (st1', in1, out1) -> return (st1', in1, out1)
+    Just (Bool False) -> case execStmt (st2, sto, i) of
+      Just (st2', in2, out2) -> return (st2', in2, out2)
+--execStmt (DoWhile st1 expr1, sto, i) =
+--  do v <- evalExpr sto expr1
+--    case execStmt (st1)
       
 -- complete the definition
 execStmt _ = error "Definition of execStmt is incomplete!"
