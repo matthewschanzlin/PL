@@ -105,24 +105,27 @@ execStmt (Seq s1 s2, sto, i) =
   do (sto', i', out1) <- execStmt (s1, sto, i)
      (sto'', i'', out2) <- execStmt (s2, sto', i')
      return (sto'', i'', out1 ++ out2)
-execStmt (Print e, sto, i) =
-  do v <- evalExpr sto e
-     return (sto, i, [v])
-execStmt (While e c, sto, i) =
-  case evalExpr sto e of
-    Just (Bool False) -> Just (sto, i, [])
-    Just (Bool True) -> case execStmt (c, sto, i) of
-      Just (sto', in1, out1) -> case execStmt (While e c, sto', in1) of
-        Just (sto'', in2, out2) -> return (sto'', in2, out1 ++ out2)
-execStmt (If expr st1 st2, sto, i) =
-  case evalExpr sto expr of
-    Just (Bool True) -> case execStmt (st1, sto, i) of
-      Just (st1', in1, out1) -> return (st1', in1, out1)
-    Just (Bool False) -> case execStmt (st2, sto, i) of
-      Just (st2', in2, out2) -> return (st2', in2, out2)
---execStmt (DoWhile st1 expr1, sto, i) =
---  do v <- evalExpr sto expr1
---    case execStmt (st1)
+execStmt (Print expr1, sto1, in1) =
+  do val1 <- evalExpr sto1 expr1
+     return (sto1, in1, [val1])
+execStmt (While expr1 stmt1, sto1, in1) =
+  case evalExpr sto1 expr1 of
+    Just (Bool False) -> Just (sto1, in1, [])
+    Just (Bool True) -> case execStmt (stmt1, sto1, in1) of
+      Just (sto2, in2, out2) -> case execStmt (While expr1 stmt1, sto2, in2) of
+        Just (sto3, in3, out3) -> return (sto3, in3, out2 ++ out3)
+execStmt (If expr1 st1 st2, sto1, in1) =
+  case evalExpr sto1 expr1 of
+    Just (Bool True) -> case execStmt (st1, sto1, in1) of
+      Just (st1', in1', out1) -> return (st1', in1', out1)
+    Just (Bool False) -> case execStmt (st2, sto1, in1) of
+      Just (st2', in1', out2) -> return (st2', in1', out2)
+execStmt (DoWhile stmt1 expr1, sto1, in1) =
+  case execStmt (stmt1, sto1, in1) of
+    Just (sto1', in1', out1) -> case evalExpr sto1 expr1 of
+      Just (Bool False) -> Just (sto1', in1', out1)
+      Just (Bool True) -> case execStmt (While expr1 stmt1, sto1', in1') of
+        Just (sto2, in2, out2) -> return (sto2, in2, out1 ++ out2)
       
 -- complete the definition
 execStmt _ = error "Definition of execStmt is incomplete!"
