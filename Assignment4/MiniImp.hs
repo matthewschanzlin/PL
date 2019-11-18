@@ -126,14 +126,16 @@ execStmt (DoWhile stmt1 expr1, sto1, in1) =
       Just (Bool False) -> Just (sto1', in1', out1)
       Just (Bool True) -> case execStmt (While expr1 stmt1, sto1', in1') of
         Just (sto2, in2, out2) -> return (sto2, in2, out1 ++ out2)
-execStmt (For var1 expr1 expr2 stmt1, sto1, in1) = 
-  do v1 <- evalExpr sto1 expr1
-    (sto1', in1', out1) <- execStmt (Assign var1 v1, sto1, in1)
-    v2 <- evalExpr sto1 expr2
-    case evalExpr sto1' (Le v1 v2) of
-      Just (Bool True) -> case execStmt (stmt1, sto1, in1) of
-        Just (sto1', in1', out1) -> return execStmt (For )
-
+--execStmt (For var1 expr1 expr2 stmt1, sto1, in1) = 
+--  do v1 <- evalExpr sto1 expr1
+--    (sto1', in1', out1) <- execStmt (Assign var1 v1, sto1, in1)
+--    v2 <- evalExpr sto1 expr2
+--    case evalExpr sto1' (Le v1 v2) of
+--      Just (Bool True) -> case execStmt (stmt1, sto1, in1) of
+--        Just (sto1', in1', out1) -> return execStmt (For )
+execStmt (Read var1, sto1, in1) = 
+  case getInput () of
+    Just newInput -> return (add var1 newInput sto1, in1, [])
       
 -- complete the definition
 execStmt _ = error "Definition of execStmt is incomplete!"
@@ -145,7 +147,10 @@ exercise7 :: Stmt
 exercise7 = undefined
 
 ---------------------------- your helper functions --------------------------
-
+getInput :: IO (String)
+getInput = do
+  input <- getLine
+  return input
 
 ----------------------------------- TESTS -----------------------------------
 
@@ -177,9 +182,9 @@ tests = do
   test "print 10"
        (execStmt (Print (Val (Num 10)), empty, [])) 
        (Just (empty, [], [Num 10]))
-  --test "read then print 42"
-  --     (execToOutWithIn (Seq (Read "x") (Print (Var "x"))) [42])
-  --     (Just [Num 42])
+  test "read then print 42"
+       (execToOutWithIn (Seq (Read "x") (Print (Var "x"))) [42])
+       (Just [Num 42])
   --test "do { print 12 } while false"
   --     (execToOut (DoWhile (Print (num 12)) (bool False)))
   --     (Just [Num 12])
