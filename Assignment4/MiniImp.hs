@@ -126,17 +126,23 @@ execStmt (DoWhile stmt1 expr1, sto1, in1) =
       Just (Bool False) -> Just (sto1', in1', out1)
       Just (Bool True) -> case execStmt (While expr1 stmt1, sto1', in1') of
         Just (sto2, in2, out2) -> return (sto2, in2, out1 ++ out2)
---execStmt (For var1 expr1 expr2 stmt1, sto1, in1) = 
---  do v1 <- evalExpr sto1 expr1
---    (sto1', in1', out1) <- execStmt (Assign var1 v1, sto1, in1)
---    v2 <- evalExpr sto1 expr2
---    case evalExpr sto1' (Le v1 v2) of
---      Just (Bool True) -> case execStmt (stmt1, sto1, in1) of
---        Just (sto1', in1', out1) -> return execStmt (For )
 execStmt (Read var1, sto1, in1) = 
-  case getInput () of
-    Just newInput -> return (add var1 newInput sto1, in1, [])
-      
+  do 
+    v <- execStmt (Assign var1 (Val (Num (head in1))), sto1, (tail in1))
+    return v
+execStmt (For var1 expr1 expr2 stmt1, sto1, in1) = 
+  do 
+    v1 <- evalExpr sto1 expr1
+    (sto1', in1', out1) <- execStmt (Assign var1 (Val v1), sto1, in1)
+    v2 <- evalExpr sto1' expr2
+    case evalExpr sto1' (Le (Var var1) (Val v2)) of
+      Just (Bool True) -> case execStmt (stmt1, sto1', in1') of
+        Just (sto2, in2, out2) -> do
+          v3 <- evalExpr sto2 (Add (Val v1) (Val (Num 1)))
+          (sto2', in2', out2') <- execStmt (Assign var1 (Val v3), sto2, in2)
+          case execStmt (For var1 expr1 expr2 stmt1, sto2', in2') of
+            Just (sto3, in3, out3) -> return (sto3, in3, out1 ++ out2 ++ out2' ++ out3)
+
 -- complete the definition
 execStmt _ = error "Definition of execStmt is incomplete!"
 
@@ -147,10 +153,6 @@ exercise7 :: Stmt
 exercise7 = undefined
 
 ---------------------------- your helper functions --------------------------
-getInput :: IO (String)
-getInput = do
-  input <- getLine
-  return input
 
 ----------------------------------- TESTS -----------------------------------
 
@@ -185,9 +187,9 @@ tests = do
   test "read then print 42"
        (execToOutWithIn (Seq (Read "x") (Print (Var "x"))) [42])
        (Just [Num 42])
-  --test "do { print 12 } while false"
-  --     (execToOut (DoWhile (Print (num 12)) (bool False)))
-  --     (Just [Num 12])
+  test "do { print 12 } while false"
+       (execToOut (DoWhile (Print (num 12)) (bool False)))
+       (Just [Num 12])
   --test "for x = 1 to 5 { print x }"
   --     (execToOut (For "x" (num 1) (num 5) (Print (Var "x"))))
   --     (Just [Num 1, Num 2, Num 3, Num 4, Num 5])
