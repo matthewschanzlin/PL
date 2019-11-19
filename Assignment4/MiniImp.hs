@@ -165,6 +165,7 @@ execStmt (ForEach var1 var2 stmt1, sto1, in1) =
                 (sto2', in2', out2') <- execStmt (Assign var2 (Val restArray), sto2, in2)
                 case execStmt (ForEach var1 var2 stmt1, sto2', in2') of
                   Just (sto3, in3, out3) -> return (sto3, in3, out1 ++ out2 ++ out2' ++ out3)
+      _ -> return (sto1, in1, [])
 
 exercise6 :: Stmt
 exercise6 = undefined
@@ -267,11 +268,17 @@ tests = do
                    Print (Get "array" (num 3)) `Seq`
                    Print (Get "array" (num 4))))
        (Just [Num 5, Num 5, Num 42, Num 5, Num 5])
-  test "foreach print 0 1 2 3"
-       (execToOut (NewArray "array" (num 4) (num 0) `Seq`
+  test "foreach print 0 1 2 3 4"
+       (execToOut (NewArray "array" (num 5) (num 0) `Seq`
                    Set "array" (num 1) (num 1) `Seq`
                    Set "array" (num 2) (num 2) `Seq`
                    Set "array" (num 3) (num 3) `Seq`
+                   Set "array" (num 4) (num 4) `Seq`
                    ForEach "x" "array" (Print (Var "x"))))
-       (Just [Num 0, Num 1, Num 2, Num 3])
+       (Just [Num 0, Num 1, Num 2, Num 3, Num 4])
+  test "foreach print 1 1 1 1 1"
+        (execToOut (Seq 
+          (NewArray "array" (Val (Num 5)) (Val (Num 1)))
+          (ForEach "x" "array" (Print (Var "x")))))
+        (Just [Num 1,Num 1,Num 1,Num 1,Num 1])
  
