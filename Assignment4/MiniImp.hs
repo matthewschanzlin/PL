@@ -132,18 +132,18 @@ execStmt (Read var1, sto1, in1) =
   do 
     v <- execStmt (Assign var1 (Val (Num (head in1))), sto1, (tail in1))
     return v
-execStmt (For var1 expr1 expr2 stmt1, sto1, in1) = 
-  do 
-    v1 <- evalExpr sto1 expr1
-    (sto1', in1', out1) <- execStmt (Assign var1 (Val v1), sto1, in1)
-    v2 <- evalExpr sto1' expr2
-    case evalExpr sto1' (Le (Var var1) (Val v2)) of
-      Just (Bool True) -> case execStmt (stmt1, sto1', in1') of
-        Just (sto2, in2, out2) -> do
-          v3 <- evalExpr sto2 (Add (Val v1) (Val (Num 1)))
-          (sto2', in2', out2') <- execStmt (Assign var1 (Val v3), sto2, in2)
-          case execStmt (For var1 expr1 expr2 stmt1, sto2', in2') of
-            Just (sto3, in3, out3) -> return (sto3, in3, out1 ++ out2 ++ out2' ++ out3)
+--execStmt (For var1 expr1 expr2 stmt1, sto1, in1) = 
+--  do 
+--    v1 <- evalExpr sto1 expr1
+--    (sto1', in1', out1) <- execStmt (Assign var1 (Val v1), sto1, in1)
+--    v2 <- evalExpr sto1' expr2
+--    case evalExpr sto1' (Le (Var var1) (Val v2)) of
+--      Just (Bool True) -> case execStmt (stmt1, sto1', in1') of
+--        Just (sto2, in2, out2) -> do
+--          v3 <- evalExpr sto2 (Add (Val v1) (Val (Num 1)))
+--          (sto2', in2', out2') <- execStmt (Assign var1 (Val v3), sto2, in2)
+--          case execStmt (For var1 expr1 expr2 stmt1, sto2', in2') of
+--            Just (sto3, in3, out3) -> return (sto3, in3, out1 ++ out2 ++ out2' ++ out3)
 execStmt (NewArray var1 expr1 expr2, sto1, in1) =
   do
     size <- evalExpr sto1 expr1
@@ -158,6 +158,17 @@ execStmt (Set var1 expr1 expr2, sto1, in1) =
     case replaceItem array index newVal of
       Just newVal -> case execStmt (Assign var1 (Val newVal), sto1, in1) of
         Just (sto1', in1', out1') -> return (sto1', in1', out1')
+--execStmt (ForEach var1 var2 stmt1, sto1, in1) = 
+--  do
+--    array <- evalExpr sto1 (Var var2)
+--    case getItem array (Num 0) of
+--      Just arrayVal -> do
+--        (sto1', in1', out1) <- execStmt (Assign var1 (Val arrayVal), sto1, in1)
+--        case execStmt (stmt1, sto1', in1') of
+--          Just (sto2, in2, out2) -> do
+--            restArray <- restOfArray array
+--            (sto2', in2', out2') <- execStmt (Assign var2 (Val restArray), sto2, in2)
+--            return execStmt (ForEach var1 var2 stmt1, sto2', in2')
 
 -- complete the definition
 execStmt _ = error "Definition of execStmt is incomplete!"
@@ -194,6 +205,12 @@ getItem :: Value -> Value -> Maybe Integer
 getItem (Array array) (Num index)
   | fromInteger index > length array - 1 = Nothing
   | otherwise = Just (array!!fromInteger index)
+
+restOfArray :: Value -> Maybe Value
+restOfArray (Array array) = case length array of
+  0 -> Nothing
+  1 -> Just (Array [])
+  _ -> Just (Array (tail array))
 ----------------------------------- TESTS -----------------------------------
 
 -- Helpers for testing
