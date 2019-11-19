@@ -134,18 +134,10 @@ execStmt (Read var1, sto1, in1) =
     return v
 execStmt (For var1 expr1 expr2 stmt1, sto1, in1) = 
   do 
-    case evalExpr sto1 (Var var1) of
-      Just v1 -> do
-        (sto1', _, _) <- execStmt (Assign var1 (Val v1), sto1, in1)
-        do
-          v <- execForHelper (For var1 expr1 expr2 stmt1, sto1', in1)
-          return v
-      _ -> do
-        v1 <- evalExpr sto1 expr1
-        (sto1', _, _) <- execStmt (Assign var1 (Val v1), sto1, in1)
-        do
-          v <- execForHelper (For var1 expr1 expr2 stmt1, sto1', in1) 
-          return v
+    v1 <- evalExpr sto1 expr1
+    (sto1', _, _) <- execStmt (Assign var1 (Val v1), sto1, in1)
+    v <- execForHelper (For var1 expr1 expr2 stmt1, sto1', in1)
+    return v
 execStmt (NewArray var1 expr1 expr2, sto1, in1) =
   do
     size <- evalExpr sto1 expr1
