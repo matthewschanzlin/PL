@@ -137,27 +137,15 @@ execStmt (For var1 expr1 expr2 stmt1, sto1, in1) =
     case evalExpr sto1 (Var var1) of
       Just v1 -> do
         (sto1', _, _) <- execStmt (Assign var1 (Val v1), sto1, in1)
-        v2 <- evalExpr sto1' expr2
-        case evalExpr sto1' (Le (Var var1) (Val v2)) of
-          Just (Bool True) -> case execStmt (stmt1, sto1', in1) of
-            Just (sto2, in2, out2) -> do
-              v3 <- evalExpr sto2 (Add (Val v1) (Val (Num 1)))
-              (sto2', _, _) <- execStmt (Assign var1 (Val v3), sto2, in2)
-              case execStmt (For var1 expr1 expr2 stmt1, sto2', in2) of
-                Just (sto3, in3, out3) -> return (sto3, in3, out2 ++ out3)
-          Just (Bool False) -> return (sto1', in1, [])
+        do
+          v <- execForHelper (For var1 expr1 expr2 stmt1, sto1', in1)
+          return v
       _ -> do
         v1 <- evalExpr sto1 expr1
         (sto1', _, _) <- execStmt (Assign var1 (Val v1), sto1, in1)
-        v2 <- evalExpr sto1' expr2
-        case evalExpr sto1' (Le (Var var1) (Val v2)) of
-          Just (Bool True) -> case execStmt (stmt1, sto1', in1) of
-            Just (sto2, in2, out2) -> do
-              v3 <- evalExpr sto2 (Add (Val v1) (Val (Num 1)))
-              (sto2', _, _) <- execStmt (Assign var1 (Val v3), sto2, in2)
-              case execStmt (For var1 expr1 expr2 stmt1, sto2', in2) of
-                Just (sto3, in3, out3) -> return (sto3, in3, out2 ++ out3)
-          Just (Bool False) -> return (sto1', in1, [])
+        do
+          v <- execForHelper (For var1 expr1 expr2 stmt1, sto1', in1) 
+          return v
 execStmt (NewArray var1 expr1 expr2, sto1, in1) =
   do
     size <- evalExpr sto1 expr1
@@ -193,6 +181,7 @@ exercise7 :: Stmt
 exercise7 = undefined
 
 ---------------------------- your helper functions --------------------------
+-- execForHelper assumes that var1 is inside the store
 execForHelper :: (Stmt, Store Value, In) -> Maybe (Store Value, In, Out)
 execForHelper (For var1 expr1 expr2 stmt1, sto1, in1) =
   do
