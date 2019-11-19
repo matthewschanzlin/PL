@@ -116,18 +116,27 @@ execStmt (While expr1 stmt1, sto1, in1) =
     Just (Bool True) -> case execStmt (stmt1, sto1, in1) of
       Just (sto2, in2, out2) -> case execStmt (While expr1 stmt1, sto2, in2) of
         Just (sto3, in3, out3) -> return (sto3, in3, out2 ++ out3)
+        _ -> Nothing
+      _ -> Nothing
+    _ -> Nothing
 execStmt (If expr1 st1 st2, sto1, in1) =
   case evalExpr sto1 expr1 of
     Just (Bool True) -> case execStmt (st1, sto1, in1) of
       Just (st1', in1', out1) -> return (st1', in1', out1)
+      _ -> Nothing
     Just (Bool False) -> case execStmt (st2, sto1, in1) of
       Just (st2', in1', out2) -> return (st2', in1', out2)
+      _ -> Nothing
+    _ -> Nothing
 execStmt (DoWhile stmt1 expr1, sto1, in1) =
   case execStmt (stmt1, sto1, in1) of
     Just (sto1', in1', out1) -> case evalExpr sto1 expr1 of
       Just (Bool False) -> Just (sto1', in1', out1)
       Just (Bool True) -> case execStmt (While expr1 stmt1, sto1', in1') of
         Just (sto2, in2, out2) -> return (sto2, in2, out1 ++ out2)
+        _ -> Nothing
+      _ -> Nothing
+    _ -> Nothing
 execStmt (Read var1, sto1, in1) = 
   do 
     v <- execStmt (Assign var1 (Val (Num (head in1))), sto1, (tail in1))
@@ -144,6 +153,7 @@ execStmt (NewArray var1 expr1 expr2, sto1, in1) =
     val <- evalExpr sto1 expr2
     case execStmt (Assign var1 (Val (createArray size val)), sto1, in1) of
       Just (sto1', in1', out1') -> return (sto1', in1', out1')
+      _ -> Nothing
 execStmt (Set var1 expr1 expr2, sto1, in1) = 
   do
     index <- evalExpr sto1 expr1
@@ -152,6 +162,8 @@ execStmt (Set var1 expr1 expr2, sto1, in1) =
     case replaceItem array index newVal of
       Just newVal -> case execStmt (Assign var1 (Val newVal), sto1, in1) of
         Just (sto1', in1', out1') -> return (sto1', in1', out1')
+        _ -> Nothing
+      _ -> Nothing
 execStmt (ForEach var1 var2 stmt1, sto1, in1) = 
   do
     array <- evalExpr sto1 (Var var2)
@@ -165,6 +177,9 @@ execStmt (ForEach var1 var2 stmt1, sto1, in1) =
                 (sto2', in2', out2') <- execStmt (Assign var2 (Val restArray), sto2, in2)
                 case execStmt (ForEach var1 var2 stmt1, sto2', in2') of
                   Just (sto3, in3, out3) -> return (sto3, in3, out1 ++ out2 ++ out2' ++ out3)
+                  _ -> Nothing
+              _ -> Nothing
+          _ -> Nothing
       _ -> return (sto1, in1, [])
 
 exercise6 :: Stmt
