@@ -17,7 +17,7 @@ type Variable = String
 
 data Value = Num Integer
            | Bool Bool
-           | Array () -- replace with your representation of arrays
+           | Array [Integer] -- replace with your representation of arrays
            deriving (Show, Eq)
 
 data Expr = Val Value
@@ -91,10 +91,11 @@ evalExpr sto (Le e1 e2) =
   do Num n1 <- evalExpr sto e1
      Num n2 <- evalExpr sto e2
      return (Bool (n1 <= n2))
---evalExpr sto (Get v1 e1) = 
---  do 
--- complete the definition
-evalExpr _ _ = error "Definition of evalExpr is incomplete!"
+evalExpr sto (Get var1 expr1) = 
+  do 
+    index <- evalExpr sto expr1
+    array <- evalExpr sto (Var var1)
+    return (Num (getItem array index))
 
 -- evaluation of statements
 execStmt :: (Stmt, Store Value, In) -> Maybe (Store Value, In, Out)
@@ -142,6 +143,19 @@ execStmt (For var1 expr1 expr2 stmt1, sto1, in1) =
           (sto2', in2', out2') <- execStmt (Assign var1 (Val v3), sto2, in2)
           case execStmt (For var1 expr1 expr2 stmt1, sto2', in2') of
             Just (sto3, in3, out3) -> return (sto3, in3, out1 ++ out2 ++ out2' ++ out3)
+execStmt (NewArray var1 expr1 expr2, sto1, in1) =
+  do
+    size <- evalExpr sto1 expr1
+    val <- evalExpr sto1 expr2
+    case execStmt (Assign var1 (Val (createArray size val)), sto1, in1) of
+      Just (sto1', in1', out1') -> return (sto1', in1', out1')
+execStmt (Set var1 expr1 expr2, sto1, in1) = 
+  do
+    index <- evalExpr sto1 expr1
+    newVal <- evalExpr sto1 expr2
+    array <- evalExpr sto1 (Var var1)
+    case execStmt (Assign var1 (Val (replaceItem array index newVal)), sto1, in1) of
+      Just (sto1', in1', out1') -> return (sto1', in1', out1')
 
 -- complete the definition
 execStmt _ = error "Definition of execStmt is incomplete!"
@@ -153,7 +167,27 @@ exercise7 :: Stmt
 exercise7 = undefined
 
 ---------------------------- your helper functions --------------------------
+createArray :: Value -> Value -> Value
+createArray (Num 0) _ = (Array [])
+createArray (Num numVals) (Num val) = appendArray (Array [val]) (createArray (Num (numVals - 1)) (Num val))
 
+appendArray :: Value -> Value -> Value
+appendArray (Array a) (Array b) = (Array (appendArrayHelper a b))
+
+appendArrayHelper :: [Integer] -> [Integer] -> [Integer]
+appendArrayHelper a b = a ++ b
+
+replaceItem :: Value -> Value -> Value -> Value
+replaceItem (Array array) (Num index) (Num val) = (Array (replaceItemHelper array index val))
+
+replaceItemHelper :: [Integer] -> Integer -> Integer -> [Integer]
+replaceItemHelper [] _ _ = []
+replaceItemHelper (first_elem:other_elems) index newVal
+  | index == 0 = newVal : other_elems
+  | otherwise = first_elem : replaceItemHelper other_elems (index - 1) newVal
+
+getItem :: Value -> Value -> Integer
+getItem (Array array) (Num index) = array!!fromInteger index
 ----------------------------------- TESTS -----------------------------------
 
 -- Helpers for testing
@@ -193,15 +227,15 @@ tests = do
   --test "for x = 1 to 5 { print x }"
   --     (execToOut (For "x" (num 1) (num 5) (Print (Var "x"))))
   --     (Just [Num 1, Num 2, Num 3, Num 4, Num 5])
-  --test "Array with 5 elements"
-  --     (execToOut (NewArray "array" (num 5) (num 5) `Seq`
-  --                 Set "array" (num 2) (num 42) `Seq`           
-  --                 Print (Get "array" (num 0)) `Seq`
-  --                 Print (Get "array" (num 1)) `Seq`
-  --                 Print (Get "array" (num 2)) `Seq`
-  --                 Print (Get "array" (num 3)) `Seq`
-  --                 Print (Get "array" (num 4))))
-  --     (Just [Num 5, Num 5, Num 42, Num 5, Num 5])
+  test "Array with 5 elements"
+       (execToOut (NewArray "array" (num 5) (num 5) `Seq`
+                   Set "array" (num 2) (num 42) `Seq`           
+                   Print (Get "array" (num 0)) `Seq`
+                   Print (Get "array" (num 1)) `Seq`
+                   Print (Get "array" (num 2)) `Seq`
+                   Print (Get "array" (num 3)) `Seq`
+                   Print (Get "array" (num 4))))
+       (Just [Num 5, Num 5, Num 42, Num 5, Num 5])
   --test "foreach print 0 1 2 3"
   --     (execToOut (NewArray "array" (num 4) (num 0) `Seq`
   --                 Set "array" (num 1) (num 1) `Seq`
