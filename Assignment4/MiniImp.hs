@@ -95,7 +95,8 @@ evalExpr sto (Get var1 expr1) =
   do 
     index <- evalExpr sto expr1
     array <- evalExpr sto (Var var1)
-    return (Num (getItem array index))
+    case getItem array index of
+      Just v -> return (Num v)
 
 -- evaluation of statements
 execStmt :: (Stmt, Store Value, In) -> Maybe (Store Value, In, Out)
@@ -154,8 +155,9 @@ execStmt (Set var1 expr1 expr2, sto1, in1) =
     index <- evalExpr sto1 expr1
     newVal <- evalExpr sto1 expr2
     array <- evalExpr sto1 (Var var1)
-    case execStmt (Assign var1 (Val (replaceItem array index newVal)), sto1, in1) of
-      Just (sto1', in1', out1') -> return (sto1', in1', out1')
+    case replaceItem array index newVal of
+      Just newVal -> case execStmt (Assign var1 (Val newVal), sto1, in1) of
+        Just (sto1', in1', out1') -> return (sto1', in1', out1')
 
 -- complete the definition
 execStmt _ = error "Definition of execStmt is incomplete!"
@@ -177,8 +179,10 @@ appendArray (Array a) (Array b) = (Array (appendArrayHelper a b))
 appendArrayHelper :: [Integer] -> [Integer] -> [Integer]
 appendArrayHelper a b = a ++ b
 
-replaceItem :: Value -> Value -> Value -> Value
-replaceItem (Array array) (Num index) (Num val) = (Array (replaceItemHelper array index val))
+replaceItem :: Value -> Value -> Value -> Maybe Value
+replaceItem (Array array) (Num index) (Num val)
+  | fromInteger index > length array - 1  = Nothing
+  | otherwise = Just (Array (replaceItemHelper array index val))
 
 replaceItemHelper :: [Integer] -> Integer -> Integer -> [Integer]
 replaceItemHelper [] _ _ = []
@@ -186,8 +190,10 @@ replaceItemHelper (first_elem:other_elems) index newVal
   | index == 0 = newVal : other_elems
   | otherwise = first_elem : replaceItemHelper other_elems (index - 1) newVal
 
-getItem :: Value -> Value -> Integer
-getItem (Array array) (Num index) = array!!fromInteger index
+getItem :: Value -> Value -> Maybe Integer
+getItem (Array array) (Num index)
+  | fromInteger index > length array - 1 = Nothing
+  | otherwise = Just (array!!fromInteger index)
 ----------------------------------- TESTS -----------------------------------
 
 -- Helpers for testing
