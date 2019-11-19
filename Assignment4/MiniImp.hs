@@ -132,18 +132,32 @@ execStmt (Read var1, sto1, in1) =
   do 
     v <- execStmt (Assign var1 (Val (Num (head in1))), sto1, (tail in1))
     return v
---execStmt (For var1 expr1 expr2 stmt1, sto1, in1) = 
---  do 
---    v1 <- evalExpr sto1 expr1
---    (sto1', in1', out1) <- execStmt (Assign var1 (Val v1), sto1, in1)
---    v2 <- evalExpr sto1' expr2
---    case evalExpr sto1' (Le (Var var1) (Val v2)) of
---      Just (Bool True) -> case execStmt (stmt1, sto1', in1') of
---        Just (sto2, in2, out2) -> do
---          v3 <- evalExpr sto2 (Add (Val v1) (Val (Num 1)))
---          (sto2', in2', out2') <- execStmt (Assign var1 (Val v3), sto2, in2)
---          case execStmt (For var1 expr1 expr2 stmt1, sto2', in2') of
---            Just (sto3, in3, out3) -> return (sto3, in3, out1 ++ out2 ++ out2' ++ out3)
+execStmt (For var1 expr1 expr2 stmt1, sto1, in1) = 
+  do 
+    case evalExpr sto1 (Var var1) of
+      Just v1 -> do
+        (sto1', _, _) <- execStmt (Assign var1 (Val v1), sto1, in1)
+        v2 <- evalExpr sto1' expr2
+        case evalExpr sto1' (Le (Var var1) (Val v2)) of
+          Just (Bool True) -> case execStmt (stmt1, sto1', in1) of
+            Just (sto2, in2, out2) -> do
+              v3 <- evalExpr sto2 (Add (Val v1) (Val (Num 1)))
+              (sto2', _, _) <- execStmt (Assign var1 (Val v3), sto2, in2)
+              case execStmt (For var1 expr1 expr2 stmt1, sto2', in2) of
+                Just (sto3, in3, out3) -> return (sto3, in3, out2 ++ out3)
+          Just (Bool False) -> return (sto1', in1, [])
+      _ -> do
+        v1 <- evalExpr sto1 expr1
+        (sto1', _, _) <- execStmt (Assign var1 (Val v1), sto1, in1)
+        v2 <- evalExpr sto1' expr2
+        case evalExpr sto1' (Le (Var var1) (Val v2)) of
+          Just (Bool True) -> case execStmt (stmt1, sto1', in1) of
+            Just (sto2, in2, out2) -> do
+              v3 <- evalExpr sto2 (Add (Val v1) (Val (Num 1)))
+              (sto2', _, _) <- execStmt (Assign var1 (Val v3), sto2, in2)
+              case execStmt (For var1 expr1 expr2 stmt1, sto2', in2) of
+                Just (sto3, in3, out3) -> return (sto3, in3, out2 ++ out3)
+          Just (Bool False) -> return (sto1', in1, [])
 execStmt (NewArray var1 expr1 expr2, sto1, in1) =
   do
     size <- evalExpr sto1 expr1
@@ -158,20 +172,19 @@ execStmt (Set var1 expr1 expr2, sto1, in1) =
     case replaceItem array index newVal of
       Just newVal -> case execStmt (Assign var1 (Val newVal), sto1, in1) of
         Just (sto1', in1', out1') -> return (sto1', in1', out1')
---execStmt (ForEach var1 var2 stmt1, sto1, in1) = 
---  do
---    array <- evalExpr sto1 (Var var2)
---    case getItem array (Num 0) of
---      Just arrayVal -> do
---        (sto1', in1', out1) <- execStmt (Assign var1 (Val arrayVal), sto1, in1)
---        case execStmt (stmt1, sto1', in1') of
---          Just (sto2, in2, out2) -> do
---            restArray <- restOfArray array
---            (sto2', in2', out2') <- execStmt (Assign var2 (Val restArray), sto2, in2)
---            return execStmt (ForEach var1 var2 stmt1, sto2', in2')
-
--- complete the definition
-execStmt _ = error "Definition of execStmt is incomplete!"
+execStmt (ForEach var1 var2 stmt1, sto1, in1) = 
+  do
+    array <- evalExpr sto1 (Var var2)
+    case getItem array (Num 0) of
+      Just arrayVal -> do
+        (sto1', in1', out1) <- execStmt (Assign var1 (Val (Num arrayVal)), sto1, in1)
+        case execStmt (stmt1, sto1', in1') of
+          Just (sto2, in2, out2) -> do
+            case restOfArray array of
+              Just restArray -> do
+                (sto2', in2', out2') <- execStmt (Assign var2 (Val restArray), sto2, in2)
+                case execStmt (ForEach var1 var2 stmt1, sto2', in2') of
+                  Just (sto3, in3, out3) -> return (sto3, in3, out1 ++ out2 ++ out2' ++ out3)
 
 exercise6 :: Stmt
 exercise6 = undefined
@@ -180,6 +193,20 @@ exercise7 :: Stmt
 exercise7 = undefined
 
 ---------------------------- your helper functions --------------------------
+execForHelper :: (Stmt, Store Value, In) -> Maybe (Store Value, In, Out)
+execForHelper (For var1 expr1 expr2 stmt1, sto1, in1) =
+  do
+    v1 <- evalExpr sto1 (Var var1)
+    v2 <- evalExpr sto1 expr2
+    case evalExpr sto1 (Le (Var var1) (Val v2)) of
+      Just (Bool True) -> case execStmt (stmt1, sto1, in1) of
+        Just (sto2, in2, out2) -> do
+          v3 <- evalExpr sto2 (Add (Val v1) (Val (Num 1)))
+          (sto2', _, _) <- execStmt (Assign var1 (Val v3), sto2, in2)
+          case execForHelper (For var1 expr1 expr2 stmt1, sto2', in2) of
+            Just (sto3, in3, out3) -> return (sto3, in3, out2 ++ out3)
+      Just (Bool False) -> return (sto1, in1, [])
+
 createArray :: Value -> Value -> Value
 createArray (Num 0) _ = (Array [])
 createArray (Num numVals) (Num val) = appendArray (Array [val]) (createArray (Num (numVals - 1)) (Num val))
@@ -247,9 +274,9 @@ tests = do
   test "do { print 12 } while false"
        (execToOut (DoWhile (Print (num 12)) (bool False)))
        (Just [Num 12])
-  --test "for x = 1 to 5 { print x }"
-  --     (execToOut (For "x" (num 1) (num 5) (Print (Var "x"))))
-  --     (Just [Num 1, Num 2, Num 3, Num 4, Num 5])
+  test "for x = 1 to 5 { print x }"
+       (execToOut (For "x" (num 1) (num 5) (Print (Var "x"))))
+       (Just [Num 1, Num 2, Num 3, Num 4, Num 5])
   test "Array with 5 elements"
        (execToOut (NewArray "array" (num 5) (num 5) `Seq`
                    Set "array" (num 2) (num 42) `Seq`           
