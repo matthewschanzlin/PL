@@ -17,7 +17,7 @@ type Variable = String
 
 data Value = Num Integer
            | Bool Bool
-           | Array [Integer] -- replace with your representation of arrays
+           | Array [Value] -- replace with your representation of arrays
            deriving (Show, Eq)
 
 data Expr = Val Value
@@ -96,7 +96,7 @@ evalExpr sto (Get var1 expr1) =
     index <- evalExpr sto expr1
     array <- evalExpr sto (Var var1)
     case getItem array index of
-      Just v -> return (Num v)
+      Just v -> return v
 
 -- evaluation of statements
 execStmt :: (Stmt, Store Value, In) -> Maybe (Store Value, In, Out)
@@ -169,7 +169,7 @@ execStmt (ForEach var1 var2 stmt1, sto1, in1) =
     array <- evalExpr sto1 (Var var2)
     case getItem array (Num 0) of
       Just arrayVal -> do
-        (sto1', in1', out1) <- execStmt (Assign var1 (Val (Num arrayVal)), sto1, in1)
+        (sto1', in1', out1) <- execStmt (Assign var1 (Val arrayVal), sto1, in1)
         case execStmt (stmt1, sto1', in1') of
           Just (sto2, in2, out2) -> do
             case restOfArray array of
@@ -206,26 +206,26 @@ execForHelper (For var1 expr1 expr2 stmt1, sto1, in1) =
 
 createArray :: Value -> Value -> Value
 createArray (Num 0) _ = (Array [])
-createArray (Num numVals) (Num val) = appendArray (Array [val]) (createArray (Num (numVals - 1)) (Num val))
+createArray (Num numVals) val = appendArray (Array [val]) (createArray (Num (numVals - 1)) val)
 
 appendArray :: Value -> Value -> Value
 appendArray (Array a) (Array b) = (Array (appendArrayHelper a b))
 
-appendArrayHelper :: [Integer] -> [Integer] -> [Integer]
+appendArrayHelper :: [Value] -> [Value] -> [Value]
 appendArrayHelper a b = a ++ b
 
 replaceItem :: Value -> Value -> Value -> Maybe Value
-replaceItem (Array array) (Num index) (Num val)
+replaceItem (Array array) (Num index) val
   | fromInteger index > length array - 1  = Nothing
   | otherwise = Just (Array (replaceItemHelper array index val))
 
-replaceItemHelper :: [Integer] -> Integer -> Integer -> [Integer]
+replaceItemHelper :: [Value] -> Integer -> Value -> [Value]
 replaceItemHelper [] _ _ = []
 replaceItemHelper (first_elem:other_elems) index newVal
   | index == 0 = newVal : other_elems
   | otherwise = first_elem : replaceItemHelper other_elems (index - 1) newVal
 
-getItem :: Value -> Value -> Maybe Integer
+getItem :: Value -> Value -> Maybe Value
 getItem (Array array) (Num index)
   | fromInteger index > length array - 1 = Nothing
   | otherwise = Just (array!!fromInteger index)
