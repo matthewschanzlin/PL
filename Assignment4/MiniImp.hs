@@ -183,7 +183,50 @@ execStmt (ForEach var1 var2 stmt1, sto1, in1) =
       _ -> return (sto1, in1, [])
 
 exercise6 :: Stmt
-exercise6 = undefined
+exercise6 = Seq readAndMul printArray
+
+readAndMul :: Stmt
+readAndMul = Seq readValsToArray mulArray
+
+printArray :: Stmt
+printArray = (Seq (printEntry 0)
+                (Seq (printEntry 1)
+                  (Seq (printEntry 2)
+                    (Seq (printEntry 3) (printEntry 4)))))
+
+printEntry :: Integer -> Stmt
+printEntry n = (Print (Get "array" (num n)))
+
+mulArray :: Stmt
+mulArray = (Seq (mulEntry 0)
+              (Seq (mulEntry 1)
+                (Seq (mulEntry 2)
+                  (Seq (mulEntry 3) (mulEntry 4)))))
+
+mulEntry :: Integer -> Stmt
+mulEntry n = (Set "array" (num n) (Mul (Var "multiplier") (Get "array" (num n))))
+
+readValsToArray :: Stmt
+readValsToArray = Seq (Seq setupAndInput inputToArray) (Read "multiplier")
+
+inputToArray :: Stmt
+inputToArray = (Seq (Set "array" (num 0) (Var "0"))
+                  (Seq (Set "array" (num 1) (Var "1"))
+                    (Seq (Set "array" (num 2) (Var "2"))
+                      (Seq (Set "array" (num 3) (Var "3"))
+                           (Set "array" (num 4) (Var "4"))))))
+
+setupAndInput :: Stmt
+setupAndInput = Seq arr5to0 read5
+
+read5 :: Stmt
+read5 = (Seq (Read "0")
+          (Seq (Read "1")
+            (Seq (Read "2")
+              (Seq (Read "3") (Read "4")))))
+
+arr5to0 :: Stmt
+arr5to0 = (NewArray "array" (num 5) (num 0))
 
 exercise7 :: Stmt
 exercise7 = undefined
