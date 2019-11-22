@@ -262,11 +262,23 @@ execToOut s = execToOutWithIn s []
 tests :: IO ()
 tests = do
   -- example tests - add more
+  test "assign 10 x get x"
+        (execToOut (Seq (Assign "x" (num 42)) (Print (Var "x"))))
+        (Just [Num 42])
+  test "assign True x get x"
+        (execToOut (Seq (Assign "x" (bool True)) (Print (Var "x"))))
+        (Just [Bool True])
   test "print 10"
        (execStmt (Print (Val (Num 10)), empty, [])) 
        (Just (empty, [], [Num 10]))
   test "read then print 42"
        (execToOutWithIn (Seq (Read "x") (Print (Var "x"))) [42])
+       (Just [Num 42])
+  test "while false print 12"
+       (execToOut (While (bool False) (Print (num 12))))
+       (Just [])
+  test "if true 42 else 0"
+       (execToOut (If (bool True) (Print (num 42)) (Print (num 0))))
        (Just [Num 42])
   test "do { print 12 } while false"
        (execToOut (DoWhile (Print (num 12)) (bool False)))
