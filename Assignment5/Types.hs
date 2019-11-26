@@ -80,10 +80,19 @@ typeOf tenv (Fst e1) =
 typeOf tenv (Snd e1) =
   do (TyPair type1 type2) <- typeOf tenv e1
      return type2
---typeOf tenv (Cons e1 e2) =
-  
-
-typeOf _ e = error $ "typeOf undefined for " ++ show e
+typeOf tenv (Cons e1 e2) =
+  do type1 <- typeOf tenv e1
+     return (TyList type1)
+typeOf tenv (Nil type1) = 
+  return (TyList type1)
+typeOf tenv (IsNil e1) =
+  return TyBool
+typeOf tenv (Head e1) = 
+  do (TyList type1) <- typeOf tenv e1
+     return type1
+typeOf tenv (Tail e1) =
+  do (TyList type1) <- typeOf tenv e1
+     return (TyList type1)
 
 
 ---------------------------- your helper functions --------------------------
