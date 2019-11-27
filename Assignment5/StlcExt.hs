@@ -25,8 +25,8 @@ untypedButOk1 = (If (bool True) (num 4) (bool False))
 untypedButOk2 :: Expr
 untypedButOk2 = (Cons (num 2) (Nil TyBool))
 
-untypedButOk3 :: Expr
-untypedButOk3 = _
+--untypedButOk3 :: Expr
+--untypedButOk3 = _
 
 
 -- For simplifying definitions of functions, you might find it worthwhile to
@@ -36,7 +36,7 @@ defineFun :: Variable -> [(Variable, Type)] -> Type -> Expr -> Expr
 defineFun f args returnType body = 
   Fix (Lam f funType inner)
   where funType = (TyArrow (typeOfArgs args) funType) -- complete
-        inner = (Lam _ funType body)   -- complete
+        inner = (lamSeries args body)   -- complete
 
 -- Example function definitions:
 
@@ -69,36 +69,38 @@ factorialExpr' =
 
 
 
--- Exercise 5
-swapExpr :: Expr
-swapExpr = _
+---- Exercise 5
+--swapExpr :: Expr
+--swapExpr = _
 
-swapExprType :: Type
-swapExprType = _
-
-
--- Exercise 6
-boolListLengthExpr :: Expr
-boolListLengthExpr = _
-
-boolListLengthExprType :: Type
-boolListLengthExprType = _
+--swapExprType :: Type
+--swapExprType = _
 
 
--- Exercise 7
-zipIntExpr :: Expr
-zipIntExpr = _
+---- Exercise 6
+--boolListLengthExpr :: Expr
+--boolListLengthExpr = _
 
-zipIntExprType :: Type
-zipIntExprType = _
+--boolListLengthExprType :: Type
+--boolListLengthExprType = _
+
+
+---- Exercise 7
+--zipIntExpr :: Expr
+--zipIntExpr = _
+
+--zipIntExprType :: Type
+--zipIntExprType = _
 
 
 ---------------------------- your helper functions --------------------------
 typeOfArgs :: [(Variable, Type)] -> Type
-typeOfArgs _ = _ -- this needs to be a series of TyArrow (TyArrow (TyArrow ...))
--- in haskell, for f (a b c d e) = , type would be type(a) -> type(b) -> type(c) -> ...
---typeOfArgs (the_head:the_rest) = snd the_head
-typeOfArgs
+typeOfArgs [] = (TyList TyInt)
+typeOfArgs (first_tup:rest) = (TyArrow (snd first_tup) (typeOfArgs rest))
+
+lamSeries :: [(Variable, Type)] -> Expr -> Expr
+lamSeries [] body = body
+lamSeries (first_tup:rest) body = (Lam (fst first_tup) (snd first_tup) (lamSeries rest body))
 
 ----------------------------------- TESTS -----------------------------------
 
@@ -112,4 +114,6 @@ tests = do
     (Just (Num 15))
   test "untypedButOk1 has no type" (typeOf empty untypedButOk1) Nothing
   test "untypedButOk2 has no type" (typeOf empty untypedButOk2) Nothing
-
+  test "factorial == factorial'"
+    ((eval empty (App factorialExpr' (num 4))) == (eval empty (App factorialExpr (num 4))))
+    (True)
