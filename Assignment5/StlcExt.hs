@@ -71,11 +71,14 @@ factorialExpr' =
 
 
 -- Exercise 5
---swapExpr :: Expr
---swapExpr = _
+swapExpr :: Expr
+swapExpr = 
+  defineFun "f" [("x", (TyPair TyBool TyInt))] (TyPair TyInt TyBool) (
+    Val (VPair (Snd (Var "x")) (Fst (Var "x")))
+  )
 
---swapExprType :: Type
---swapExprType = _
+swapExprType :: Type
+swapExprType = (TyPair TyInt TyBool)
 
 
 ---- Exercise 6
