@@ -25,14 +25,9 @@ untypedButOk1 = (If (bool True) (num 4) (bool False))
 untypedButOk2 :: Expr
 untypedButOk2 = (Cons (num 2) (Nil TyBool))
 
--- third example: an expr composited of exprs that wont typecheck but will evaluate: wont typecheck, but will evaluate
--- @SCHANZII: find a real example for the third pls, I just BS'd this lmao
--- @SCHANZII: find a real example for the third pls, I just BS'd this lmao
--- @SCHANZII: find a real example for the third pls, I just BS'd this lmao
--- @SCHANZII: find a real example for the third pls, I just BS'd this lmao
--- @SCHANZII: find a real example for the third pls, I just BS'd this lmao
+-- third example: a let expr where type of lam does not match type of the final expr
 untypedButOk3 :: Expr
-untypedButOk3 = (If (bool True) untypedButOk1 untypedButOk2)
+untypedButOk3 = (App (Lam "x" TyInt (num 4)) (bool True))
 
 
 -- For simplifying definitions of functions, you might find it worthwhile to
@@ -76,19 +71,19 @@ factorialExpr' =
 
 
 -- Exercise 5
-swapExpr :: Expr
-swapExpr = _
+--swapExpr :: Expr
+--swapExpr = _
 
-swapExprType :: Type
-swapExprType = _
+--swapExprType :: Type
+--swapExprType = _
 
 
--- Exercise 6
-boolListLengthExpr :: Expr
-boolListLengthExpr = _
+---- Exercise 6
+--boolListLengthExpr :: Expr
+--boolListLengthExpr = _
 
-boolListLengthExprType :: Type
-boolListLengthExprType = _
+--boolListLengthExprType :: Type
+--boolListLengthExprType = _
 
 
 ---- Exercise 7
