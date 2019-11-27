@@ -3,7 +3,7 @@ Module      :  Types
 Description :  Type-checker implementation.
 
 Maintainer  :  Ferd <f.vesely@northeastern.edu>
-               Your Name <your email>
+               Maintainer  :  Nicholas Seidl <seidl.n@husky.neu.edu>, Matthew Schanzlin <schanzlin.ma@husky.neu.edu>
 -}
 
 {-# OPTIONS_GHC -fdefer-typed-holes -fwarn-incomplete-patterns #-}
@@ -68,8 +68,11 @@ typeOf tenv (Leq e1 e2) =
      return TyBool
 typeOf tenv (If e1 e2 e3) =
   do TyBool <- typeOf tenv e1
-     aType <- typeOf tenv e2
-     return aType
+     aType1 <- typeOf tenv e2
+     aType2 <- typeOf tenv e3
+     case aType1 == aType2 of
+       True -> return aType1
+       False -> Nothing
 typeOf tenv (Pair e1 e2) = 
   do type1 <- typeOf tenv e1
      type2 <- typeOf tenv e2
@@ -82,7 +85,10 @@ typeOf tenv (Snd e1) =
      return type2
 typeOf tenv (Cons e1 e2) =
   do type1 <- typeOf tenv e1
-     return (TyList type1)
+     (TyList type2) <- typeOf tenv e2
+     case type1 == type2 of
+       True -> return (TyList type1)
+       False -> Nothing
 typeOf tenv (Nil type1) = 
   return (TyList type1)
 typeOf tenv (IsNil e1) =

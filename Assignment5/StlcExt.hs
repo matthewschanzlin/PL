@@ -2,7 +2,7 @@
 Module      :  StlcExt
 Description :  Implementation of answers to Exercises 4-7.
 
-Maintainer  :  Your Name <your email>
+Maintainer  :  Nicholas Seidl <seidl.n@husky.neu.edu>, Matthew Schanzlin <schanzlin.ma@husky.neu.edu>
 -}
 
 {-# OPTIONS_GHC -fdefer-typed-holes -fwarn-incomplete-patterns #-}
@@ -17,11 +17,13 @@ import Maps
 import SimpleTests
 
 -- **Exercise 4**
+-- first example: different types in the then branch and else branch of If
 untypedButOk1 :: Expr
-untypedButOk1 = _
+untypedButOk1 = (If (bool True) (num 4) (bool False))
 
+-- second example: const comprised of multiple types
 untypedButOk2 :: Expr
-untypedButOk2 = _
+untypedButOk2 = (Cons (num 2) (Nil TyBool))
 
 untypedButOk3 :: Expr
 untypedButOk3 = _
@@ -33,9 +35,8 @@ untypedButOk3 = _
 defineFun :: Variable -> [(Variable, Type)] -> Type -> Expr -> Expr
 defineFun f args returnType body = 
   Fix (Lam f funType inner)
-  where funType = _ -- complete
-        inner = _   -- complete
-
+  where funType = (TyArrow (typeOf (typeOfArgs args) funType) -- complete
+        inner = (Lam _ funType body)   -- complete
 
 -- Example function definitions:
 
@@ -93,7 +94,8 @@ zipIntExprType = _
 
 
 ---------------------------- your helper functions --------------------------
-
+typeOfArgs :: [(Variable, Type)] -> Type
+typeOfArgs (the_head:the_rest) = snd the_head
 
 ----------------------------------- TESTS -----------------------------------
 

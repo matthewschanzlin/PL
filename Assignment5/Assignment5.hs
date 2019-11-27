@@ -2,7 +2,7 @@
 Module      :  Assignment5
 Description :  Assignment 5 meta-file.
 
-Maintainer  :  Your Name <your email>
+Maintainer  :  Nicholas Seidl <seidl.n@husky.neu.edu>, Matthew Schanzlin <schanzlin.ma@husky.neu.edu>
 -}
 module Assignment5 where
 
@@ -13,11 +13,11 @@ import qualified StlcExt
 -- For a single partner: (Just "Your Name", Nothing)
 -- For a pair: (Just "First Partner", Just "Second Partner")
 partners :: (Maybe String, Maybe String)
-partners = undefined
+partners = (Just "Matthew Schanzlin", Just "Nicholas Seidl")
 
 -- Please provide the total hours spent on this assignment
 hoursSpent :: (Int, Int)
-hoursSpent = (0, 0)
+hoursSpent = (25, 25)
 
 ---------------------------------------------------------------
 

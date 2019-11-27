@@ -213,17 +213,17 @@ inputToArray :: Stmt
 inputToArray = (Seq (Set "array" (num 0) (Var "0"))
                   (Seq (Set "array" (num 1) (Var "1"))
                     (Seq (Set "array" (num 2) (Var "2"))
-                      (Seq (Set "array" (num 3) (Var "3"))
-                           (Set "array" (num 4) (Var "4"))))))
+                      (Seq (Set "array" (num 3) (Var "3")) (Set "array" (num 4) (Var "4"))))))
 
 setupAndInput :: Stmt
 setupAndInput = Seq arr5to0 read5
 
 read5 :: Stmt
-read5 = (Seq (Read "0")
-          (Seq (Read "1")
-            (Seq (Read "2")
-              (Seq (Read "3") (Read "4")))))
+read5 = (For "loop0" (num 1) (num 5) (Read "loop0"))
+--read5 = (Seq (Read "0")
+--          (Seq (Read "1")
+--            (Seq (Read "2")
+--              (Seq (Read "3") (Read "4")))))
 
 arr5to0 :: Stmt
 arr5to0 = (NewArray "array" (num 5) (num 0))
