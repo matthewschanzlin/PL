@@ -25,8 +25,8 @@ untypedButOk1 = (If (bool True) (num 4) (bool False))
 untypedButOk2 :: Expr
 untypedButOk2 = (Cons (num 2) (Nil TyBool))
 
---untypedButOk3 :: Expr
---untypedButOk3 = _
+untypedButOk3 :: Expr
+untypedButOk3 = _
 
 
 -- For simplifying definitions of functions, you might find it worthwhile to
@@ -69,20 +69,20 @@ factorialExpr' =
 
 
 
----- Exercise 5
---swapExpr :: Expr
---swapExpr = _
+-- Exercise 5
+swapExpr :: Expr
+swapExpr = _
 
---swapExprType :: Type
---swapExprType = _
+swapExprType :: Type
+swapExprType = _
 
 
----- Exercise 6
---boolListLengthExpr :: Expr
---boolListLengthExpr = _
+-- Exercise 6
+boolListLengthExpr :: Expr
+boolListLengthExpr = _
 
---boolListLengthExprType :: Type
---boolListLengthExprType = _
+boolListLengthExprType :: Type
+boolListLengthExprType = _
 
 
 ---- Exercise 7
