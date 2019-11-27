@@ -35,7 +35,7 @@ untypedButOk3 = _
 defineFun :: Variable -> [(Variable, Type)] -> Type -> Expr -> Expr
 defineFun f args returnType body = 
   Fix (Lam f funType inner)
-  where funType = (TyArrow (typeOf (typeOfArgs args) funType) -- complete
+  where funType = (TyArrow (typeOfArgs args) funType) -- complete
         inner = (Lam _ funType body)   -- complete
 
 -- Example function definitions:
@@ -95,7 +95,10 @@ zipIntExprType = _
 
 ---------------------------- your helper functions --------------------------
 typeOfArgs :: [(Variable, Type)] -> Type
-typeOfArgs (the_head:the_rest) = snd the_head
+typeOfArgs _ = _ -- this needs to be a series of TyArrow (TyArrow (TyArrow ...))
+-- in haskell, for f (a b c d e) = , type would be type(a) -> type(b) -> type(c) -> ...
+--typeOfArgs (the_head:the_rest) = snd the_head
+typeOfArgs
 
 ----------------------------------- TESTS -----------------------------------
 
