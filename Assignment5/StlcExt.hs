@@ -25,8 +25,14 @@ untypedButOk1 = (If (bool True) (num 4) (bool False))
 untypedButOk2 :: Expr
 untypedButOk2 = (Cons (num 2) (Nil TyBool))
 
+-- third example: an expr composited of exprs that wont typecheck but will evaluate: wont typecheck, but will evaluate
+-- @SCHANZII: find a real example for the third pls, I just BS'd this lmao
+-- @SCHANZII: find a real example for the third pls, I just BS'd this lmao
+-- @SCHANZII: find a real example for the third pls, I just BS'd this lmao
+-- @SCHANZII: find a real example for the third pls, I just BS'd this lmao
+-- @SCHANZII: find a real example for the third pls, I just BS'd this lmao
 untypedButOk3 :: Expr
-untypedButOk3 = _
+untypedButOk3 = (If (bool True) untypedButOk1 untypedButOk2)
 
 
 -- For simplifying definitions of functions, you might find it worthwhile to
