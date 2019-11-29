@@ -68,13 +68,11 @@ factorialExpr' =
   )
 
 
-
-
 -- Exercise 5
 swapExpr :: Expr
 swapExpr = 
   defineFun "f" [("x", (TyPair TyBool TyInt))] (TyPair TyInt TyBool) (
-    Val (VPair (Snd (Var "x")) (Fst (Var "x")))
+    Pair (Snd (Var "x")) (Fst (Var "x"))
   )
 
 swapExprType :: Type
@@ -82,11 +80,16 @@ swapExprType = (TyPair TyInt TyBool)
 
 
 ---- Exercise 6
---boolListLengthExpr :: Expr
---boolListLengthExpr = _
+boolListLengthExpr :: Expr
+boolListLengthExpr = 
+  defineFun "f" [("x", (TyList TyBool))] TyInt (
+    If (IsNil (Var "x"))
+       (num 0)
+       (Add (num 1) (App (Var "f") (Tail (Var "x"))))
+  )
 
---boolListLengthExprType :: Type
---boolListLengthExprType = _
+boolListLengthExprType :: Type
+boolListLengthExprType = TyInt
 
 
 ---- Exercise 7
@@ -121,3 +124,15 @@ tests = do
   test "factorial == factorial'"
     ((eval empty (App factorialExpr' (num 4))) == (eval empty (App factorialExpr (num 4))))
     (True)
+  test "swapExpr"
+    (eval empty (App swapExpr (Pair (bool False) (num 3))))
+    (Just (VPair (Num 3) (Bool False)))
+  test "swapExpr type"
+    (typeOf empty (Pair (num 3) (bool False)))
+    (Just swapExprType)
+  test "boolListLengthExpr"
+    (eval empty (App boolListLengthExpr (Cons (bool True) (Cons (bool False) (Cons (bool False) (Nil TyBool))))))
+    (Just (Num 3))
+  test "boolListLengthExpr type"
+    (typeOf empty (num 3))
+    (Just boolListLengthExprType)
